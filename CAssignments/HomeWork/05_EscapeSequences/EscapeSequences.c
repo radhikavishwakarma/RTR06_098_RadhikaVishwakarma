@@ -1,26 +1,19 @@
 #include <stdio.h>
-
 int main(void)
 {
-    // code
+    //code
     printf("\n\n");
-    printf("----------------------------\n");
-
-    printf("Goin on to Next Line.... using \\n Escape Sequence\n");
-    printf("Demonstrating \t Horizontal \t Tab \t Using \t \\t Escape Sequence\n");
-    printf("\"This is a Double Quoted output\" Done Using \\\" Escape Sequence\n");
-    printf("\'This is a Single Quoted output\' Done Using \\\' Escape Sequence\n");
-    printf("BACKSPACE Turned to BACKSPACE\b Using Escape Sequence \\b\n\n");
+    printf("Going On To Next Line...Using \\n Escape Sequence\n\n");
+    printf("Demonstrating \t Horizontal \t Tab \t Using \t \\t Escape Sequence !!!\n\n");
+    printf("\"This Is A Doule Quoted Output\" Done Using \\\" \\\" Escape Sequence\n\n");
+    printf("\'This Is A Single Quoted Ouput\' Done Using \\\' \\\' Escape Sequence\n\n");
+    printf("BACKSPACE Turned To BACKSPACE\b Using Escape Sequence \\b\n\n");
 
     printf("\r Demonstrating Carriage Return Using \\r Escape Sequence\n");
-    printf("Demonstrating \r Carriage Return Using \\r Escape Sequence\n");
-    printf("Demonstrating Carriage \r Return Using \\r Escape Sequence\n");
+    printf("Demonstrating \r Carriage Return Using \\r Escape sequence\n");
+    printf("Demonstrating Carriage \r Return Using \\r Escape Sequence\n\n");
 
-    printf("Demonstrating \x41 Using \\xhh Escape Sequence \n\n");
-    // ox41 is the hexadecimal code for letter 'A'. 'xhh' is the placeholder for 'x'
-    // followed by 2 digits (hh), altogether forming a Hexadecimal Number
-    printf("Demonstrating \102 using \\ooo Escape Sequence\n");
-    // 102 is the octal code for letter 'B'. 'ooo' is the placeholder for 3 digits forming an octal number.
-
+    printf("Demonstrating \x41 Using \\xhh Escape Sequence\n\n"); //0x41 Is The Hexadecimal Code For Letter 'A'. 'xhh' Is The Place-holder For 'x' Followed By 2 digits (hh), altogther forming a hexadecimal Number.
+    printf("Demonstrating \102 Usiing \\ooo Escape Sequence\n\n"); //102 Is The Octal Code For Letter 'B'. 'ooo' Is The place-holder For 3 Digits Forming An Octal Number.
     return(0);
 }

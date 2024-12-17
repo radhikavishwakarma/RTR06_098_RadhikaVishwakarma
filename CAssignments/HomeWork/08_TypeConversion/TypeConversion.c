@@ -13,7 +13,7 @@ int main(void)
     float f_explicit;
 
     // code
-    printf("\n\n-----------------------------------------------------\n\n");
+    printf("\n\n\n\n");
 
     // Inter-conversion and IMPLICIT type casting between 'char' and 'int' types
     i = 70;
