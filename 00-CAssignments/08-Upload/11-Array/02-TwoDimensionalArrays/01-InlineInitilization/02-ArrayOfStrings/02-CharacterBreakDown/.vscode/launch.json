@@ -1,0 +1,24 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "C/C++ Runner: Debug Session",
+      "type": "cppdbg",
+      "request": "launch",
+      "args": [],
+      "stopAtEntry": false,
+      "externalConsole": true,
+      "cwd": "d:/My_Project_RTR/C Assignment/Upload-8A/11-Array/02-TwoDimensionalArrays/01-InlineInitilization/02-ArrayOfStrings/02-CharacterBreakDown",
+      "program": "d:/My_Project_RTR/C Assignment/Upload-8A/11-Array/02-TwoDimensionalArrays/01-InlineInitilization/02-ArrayOfStrings/02-CharacterBreakDown/build/Debug/outDebug",
+      "MIMode": "gdb",
+      "miDebuggerPath": "gdb",
+      "setupCommands": [
+        {
+          "description": "Enable pretty-printing for gdb",
+          "text": "-enable-pretty-printing",
+          "ignoreFailures": true
+        }
+      ]
+    }
+  ]
+}
