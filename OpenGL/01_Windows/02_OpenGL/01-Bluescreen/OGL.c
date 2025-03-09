@@ -1,8 +1,17 @@
-// Win32 Headers
+// Win32 Headers files
 #include<Windows.h>
 #include<stdio.h>
 #include<stdlib.h>
-#include "Window.h"
+
+// openGL related header files
+#include<gl/GL.h>
+
+// Custom Header file
+#include "OGL.h"
+
+// OpenGL related libraries
+#pragma comment(lib, "opengl32.lib")
+
 // Macros
 #define WIN_WIDTH 800
 #define WIN_HEIGHT 600
@@ -10,14 +19,14 @@
 // global function declarations
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-// Global variable declarations
-// variable related fullscreen
+// Global variable declaration
+// variables related to fullscreen
 BOOL gbFullScreen = FALSE;
 HWND ghwnd = NULL;
 DWORD dwStyle;
 WINDOWPLACEMENT wpPrev;
 
-// Active window Related variable
+// Active window Related variables
 BOOL gbActiveWindow = FALSE;
 
 // Exit key press related variable
@@ -26,6 +35,10 @@ BOOL gbEscapeKeyIsPressed = FALSE;
 // variable related with File I/O
 char gszLogFileName[] = "Log.txt";
 FILE *gpFile = NULL;
+
+// openGL related global variables
+HDC ghdc = NULL; // Handle device context
+HGLRC ghrc = NULL; // Handle to graphics rendering context
 
 // Entry Point Function
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int iCmdShow)
@@ -45,8 +58,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 
 	int smX = GetSystemMetrics(SM_CXSCREEN);
 	int smY = GetSystemMetrics(SM_CYSCREEN);
-	int x = smX / 2 - WIN_WIDTH / 2;
-	int y = smY / 2 - WIN_HEIGHT / 2;
+
+	int x = smX / 2 - WIN_WIDTH/2;
+	int y = smY / 2 - WIN_HEIGHT/2;
 	
 	// code
 	// Create log file
@@ -60,6 +74,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 	{
 		fprintf(gpFile, "Program started successfull\n");
 	}
+
 	// code
 	// Window Class Initialization
 	wndclass.cbSize = sizeof(WNDCLASSEX);
@@ -84,8 +99,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 		szAppName,
 		TEXT("Radhika Vishwakarma"),
 		WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE,
-		x,
-		y,
+		x, // update as homework
+		y, // update as homework
 		WIN_WIDTH,
 		WIN_HEIGHT,
 		NULL,
@@ -108,16 +123,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 
 	if(result != 0)
 	{
-		fprintf(gpFile, "Initialize function failed\n");
+		fprintf(gpFile, "Initialized function failed\n");
 		DestroyWindow(hwnd);
 		hwnd = NULL;	
 	}
 	else
 	{
-		fprintf(gpFile, "Initialize function compeleted successfully\n");
+		fprintf(gpFile, "Initialized function compeleted successfully\n");
 	}
 
-	// set this window as for ground and active window
+	// set this window as fore ground and active window
 	SetForegroundWindow(hwnd);
 	SetFocus(hwnd);
 
@@ -179,6 +194,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 		case WM_KILLFOCUS:
 			gbActiveWindow = FALSE;
 			break;
+		case WM_ERASEBKGND:
+			return(0);
 		case WM_SIZE:
 			resize(LOWORD(lParam), HIWORD(lParam));
 			break;
@@ -224,6 +241,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 	return(DefWindowProc(hWnd, iMsg, wParam, lParam));
 }
 
+// functions which dont have body are called as stub functions
 void toggleFullScreen(void)
 {
 	// Variable Declarations
@@ -231,7 +249,6 @@ void toggleFullScreen(void)
 	if(gbFullScreen == FALSE)
 	{
 		dwStyle = GetWindowLong(ghwnd, GWL_STYLE);
-	
 		if(dwStyle & WS_OVERLAPPEDWINDOW)
 		{
 			ZeroMemory((void*) &mi, sizeof(MONITORINFO));
@@ -258,18 +275,91 @@ void toggleFullScreen(void)
 
 int initialize(void) 
 {
+	// variable declaration
+	PIXELFORMATDESCRIPTOR pfd;
+	int iPixelFormatIndex = 0;
+
 	// code
-	return 0;
+	// pixel format descrptior intialization
+	ZeroMemory((void*) &pfd, sizeof(PIXELFORMATDESCRIPTOR));
+	pfd.nSize = sizeof(PIXELFORMATDESCRIPTOR);
+	pfd.nVersion = 1;
+	pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL |  PFD_DOUBLEBUFFER;
+	pfd.iPixelType = PFD_TYPE_RGBA;
+	pfd.cColorBits = 32;
+	pfd.cRedBits = 8;
+	pfd.cGreenBits = 8;
+	pfd.cBlueBits = 8;
+	pfd.cAlphaBits = 8;
+	
+
+// get dc
+ghdc = GetDC(ghwnd);
+
+if (ghdc == NULL)
+{
+	fprintf(gpFile, "GetDc function failed!\n");
+	return(-1);
+}
+
+// Get matching pixel format index using hdc and pfd
+iPixelFormatIndex = ChoosePixelFormat(ghdc, &pfd);
+
+if (iPixelFormatIndex == 0)
+{
+	fprintf(gpFile, "Choose Pixel Format failed!\n");
+	return(-2);
+}
+
+// select the pixel format of the found index
+if (SetPixelFormat(ghdc, iPixelFormatIndex , &pfd) == FALSE)
+{
+	fprintf(gpFile, "set Pixel Format failed!\n");
+	return(-3);
+}
+
+// create randring context by using hdc, pfd and chosen pixel format index
+ghrc = wglCreateContext(ghdc); // function from Bridging API
+if (ghdc == NULL)
+{
+	fprintf(gpFile, "wglCreateContext function failed!\n");
+	return(-4);
+}
+
+// make this rendering contaxt as current context
+if (wglMakeCurrent(ghdc, ghrc) == FALSE)
+{
+	fprintf(gpFile, "wglMakeCurrent function failed\n");
+	return(-5);
+}
+
+//  from here onwords opengl code starts
+// Tell openGL to choose the color to clear the screen
+glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+
+return(0);
 }
 
 void resize(int width, int height)
 {
-	// code	
+	// code
+		// if height by accident becomes 0 then make height 1
+	if (height <= 0)
+	{
+		height = 1;
+	}	
+
+	// Set the viewport
+	glViewport(0, 0, (GLsizei) width, (GLsizei) height);
+
 }
 
 void display(void)
 {
 	// code
+		// Clear OpenGL buffers
+	glClear(GL_COLOR_BUFFER_BIT);
+	SwapBuffers(ghdc);
 }
 
 void update(void)
@@ -278,8 +368,46 @@ void update(void)
 }
 
 void uninitialize(void)
-{
+{   
+	// Function declartion
+	void toggleFullScreen(void);
+	
+	
 	// code
+		// if user is exiting in fullscreen then return fullscreen back to normal
+	if(gbFullScreen == TRUE)
+	{
+		toggleFullScreen();
+		gbFullScreen = FALSE;
+	} 
+
+	// make hdc as current context by releasing rendering context as current context
+	if (wglGetCurrentContext == ghrc)
+	{
+		wglMakeCurrent(NULL, NULL);
+	}
+
+	// deleted the rendering context
+	if (ghrc)
+	{
+		wglDeleteContext(ghrc);
+		ghrc = NULL;
+	}
+
+	// release the DC
+	if(ghdc)
+	{
+		ReleaseDC(ghwnd, ghdc);
+		
+	}
+
+	// Destroy Window
+	if (ghwnd)
+	{
+		DestroyWindow(ghwnd);
+		ghwnd = NULL;
+	}
+
 	// Close the file
 	if (gpFile)
 	{

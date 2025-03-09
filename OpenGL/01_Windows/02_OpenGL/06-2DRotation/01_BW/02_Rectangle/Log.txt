@@ -1,0 +1,3 @@
+Program started successfully
+Initialized function completed successfully
+Program terminated successfully

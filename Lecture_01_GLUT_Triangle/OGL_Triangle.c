@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
 
     glutInitWindowSize(800, 600);
     glutInitWindowPosition(100, 100);
-    glutCreateWindow("Lokesh Vishwakarma");
+    glutCreateWindow("Radhika Vishwakarma");
 
     initialize();
 
