@@ -388,7 +388,7 @@ void display(void)
 
 	// Translate Triangle backword
 	glTranslatef(-1.5f, 0.0f, -6.0f);
-	glRotatef(angleTriangle, 0.0f, 1.0f, 0.0f);
+	glRotatef(angleTriangle, 0.0f, 0.5f, 0.0f);
 
 
 	// Draw triangle here
@@ -411,12 +411,12 @@ void display(void)
 
 	// Translate rectengle backword
 	glTranslatef(1.5f, 0.0f, -6.0f);
-	glRotatef(angleRectangle, 1.0f, 0.0f, 0.0f);
+	glRotatef(angleRectangle, 0.5f, 0.0f, 0.0f);
 
 	// Draw rectangle here
 	glBegin(GL_QUADS);
 	// set color
-	glColor3f(0.0f, 0.1f, 0.1f);
+	glColor3f(0.0f, 0.0f, 1.0f);
 	// top right
     glVertex3f(1.0f, 1.0f, 0.0f);
 	// top left
