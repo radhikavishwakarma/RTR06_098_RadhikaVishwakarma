@@ -42,6 +42,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 	MSG msg;
 	TCHAR szAppName[] = TEXT("RTR6");
 	BOOL bDone = FALSE;
+
+	int smX = GetSystemMetrics(SM_CXSCREEN);
+	int smY = GetSystemMetrics(SM_CYSCREEN);
+	int x = smX / 2 - WIN_WIDTH / 2;
+	int y = smY / 2 - WIN_HEIGHT / 2;
 	
 	// code
 	// Create log file
@@ -79,8 +84,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 		szAppName,
 		TEXT("Radhika Vishwakarma"),
 		WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE,
-		CW_USEDEFAULT,
-		CW_USEDEFAULT,
+		x,
+		y,
 		WIN_WIDTH,
 		WIN_HEIGHT,
 		NULL,
