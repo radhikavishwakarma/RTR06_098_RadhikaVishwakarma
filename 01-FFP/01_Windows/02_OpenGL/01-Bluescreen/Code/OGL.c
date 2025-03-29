@@ -293,51 +293,51 @@ int initialize(void)
 	pfd.cAlphaBits = 8;
 	
 
-// get dc
-ghdc = GetDC(ghwnd);
+	// get dc
+	ghdc = GetDC(ghwnd);
 
-if (ghdc == NULL)
-{
-	fprintf(gpFile, "GetDc function failed!\n");
-	return(-1);
-}
+	if (ghdc == NULL)
+	{
+		fprintf(gpFile, "GetDc function failed!\n");
+		return(-1);
+	}
 
-// Get matching pixel format index using hdc and pfd
-iPixelFormatIndex = ChoosePixelFormat(ghdc, &pfd);
+	// Get matching pixel format index using hdc and pfd
+	iPixelFormatIndex = ChoosePixelFormat(ghdc, &pfd);
 
-if (iPixelFormatIndex == 0)
-{
-	fprintf(gpFile, "Choose Pixel Format failed!\n");
-	return(-2);
-}
+	if (iPixelFormatIndex == 0)
+	{
+		fprintf(gpFile, "Choose Pixel Format failed!\n");
+		return(-2);
+	}
 
-// select the pixel format of the found index
-if (SetPixelFormat(ghdc, iPixelFormatIndex , &pfd) == FALSE)
-{
-	fprintf(gpFile, "set Pixel Format failed!\n");
-	return(-3);
-}
+	// select the pixel format of the found index
+	if (SetPixelFormat(ghdc, iPixelFormatIndex , &pfd) == FALSE)
+	{
+		fprintf(gpFile, "set Pixel Format failed!\n");
+		return(-3);
+	}
 
-// create randring context by using hdc, pfd and chosen pixel format index
-ghrc = wglCreateContext(ghdc); // function from Bridging API
-if (ghdc == NULL)
-{
-	fprintf(gpFile, "wglCreateContext function failed!\n");
-	return(-4);
-}
+	// create randring context by using hdc, pfd and chosen pixel format index
+	ghrc = wglCreateContext(ghdc); // function from Bridging API
+	if (ghdc == NULL)
+	{
+		fprintf(gpFile, "wglCreateContext function failed!\n");
+		return(-4);
+	}
 
-// make this rendering contaxt as current context
-if (wglMakeCurrent(ghdc, ghrc) == FALSE)
-{
-	fprintf(gpFile, "wglMakeCurrent function failed\n");
-	return(-5);
-}
+	// make this rendering contaxt as current context
+	if (wglMakeCurrent(ghdc, ghrc) == FALSE)
+	{
+		fprintf(gpFile, "wglMakeCurrent function failed\n");
+		return(-5);
+	}
 
-//  from here onwords opengl code starts
-// Tell openGL to choose the color to clear the screen
-glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+	//  from here onwords opengl code starts
+	// Tell openGL to choose the color to clear the screen
+	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 
-return(0);
+	return(0);
 }
 
 void resize(int width, int height)
