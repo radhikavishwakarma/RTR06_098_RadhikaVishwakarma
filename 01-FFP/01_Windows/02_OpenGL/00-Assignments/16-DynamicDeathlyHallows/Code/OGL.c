@@ -44,11 +44,14 @@ HGLRC ghrc = NULL; // Handle to graphics rendering context
 // rotation angles
 float angleTriangle = 0.0f;
 float angleCircle = 0.0f;
-float translateTriangleX = -1.0f;
-float translateTriangleY = -1.0f;
-float translateCircleX = 1.0f;
-float translateCircleY = -1.0f;
-float translateLineY = 1.0f;
+float translateTriangleX = -2.0f;
+float translateTriangleY = -2.0f;
+float translateCircleX = 2.0f;
+float translateCircleY = -2.0f;
+float translateLineY = 2.0f;
+BOOL isTriangleCentered = FALSE; 
+BOOL isCircleCentered = FALSE;
+
 // Entry Point Function
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int iCmdShow)
 {
@@ -394,28 +397,35 @@ void update(void)
 		angleCircle = angleCircle - 360.0f;
 	}
 
-	translateTriangleX += 0.0001f; 
-	translateTriangleY += 0.0001f;
+	translateTriangleX += 0.0005f; 
+	translateTriangleY += 0.0005f;
 	if (translateTriangleX >= 0.0f && translateTriangleY >= 0.0f)
 	{
 		translateTriangleX = 0.0f;
 		translateTriangleY = 0.0f; 
+		isTriangleCentered = TRUE;
 	}
 	
-	translateCircleX -= 0.0001f; 
-	translateCircleY += 0.0001f;
-	if (translateCircleX <= 0.0f && translateCircleY >= 0.0f)
+	if (isTriangleCentered == TRUE)
 	{
-		translateCircleX = 0.0f;
-		translateCircleY = 0.0f; 
+		translateCircleX -= 0.0005f; 
+		translateCircleY += 0.0005f;
+		if (translateCircleX <= 0.0f && translateCircleY >= 0.0f)
+		{
+			translateCircleX = 0.0f;
+			translateCircleY = 0.0f; 
+			isCircleCentered = TRUE;
+		}
 	}
-
-	translateLineY -= 0.0001f;
-	if (translateLineY <= 0.0f)
+	
+	if (isCircleCentered == TRUE)
 	{
-		translateLineY = 0.0f; 
+		translateLineY -= 0.0005f;
+		if (translateLineY <= 0.0f)
+		{
+			translateLineY = 0.0f; 
+		}
 	}
-
 }
 
 void uninitialize(void)
@@ -529,6 +539,11 @@ void drawLine(float translateLineY)
 
 	glEnd();
 }
+
+
+
+
+
 	
 
 
