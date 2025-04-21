@@ -106,7 +106,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 	hwnd = CreateWindowEx(
 		WS_EX_APPWINDOW,
 		szAppName,
-		TEXT("Lokesh Vishwakarma"),
+		TEXT("Radhika Vishwakarma"),
 		WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE,
 		x,  // update as homework
 		y,  // update as homework

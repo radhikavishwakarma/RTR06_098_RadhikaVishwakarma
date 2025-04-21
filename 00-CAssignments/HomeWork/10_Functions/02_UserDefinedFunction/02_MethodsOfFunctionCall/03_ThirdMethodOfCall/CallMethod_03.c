@@ -66,7 +66,7 @@ void Function_FirstName(void) // function definition
     // code
     Function_Is();
     printf("\n\n");
-    printf("Lokesh");
+    printf("Radhika");
 }
 
 void Function_Is(void) // function definition

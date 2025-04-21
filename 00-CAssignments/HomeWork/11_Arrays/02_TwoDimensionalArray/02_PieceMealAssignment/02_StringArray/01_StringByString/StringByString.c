@@ -45,7 +45,7 @@ int main(void)
     MyStrcpy(strArray[0], "My");
     MyStrcpy(strArray[1], "Name");
     MyStrcpy(strArray[2], "Is");
-    MyStrcpy(strArray[3], "Lokesh");
+    MyStrcpy(strArray[3], "Radhika");
     MyStrcpy(strArray[4], "Vishwakarma");
 
     printf("\n\n");
