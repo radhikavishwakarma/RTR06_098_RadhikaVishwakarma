@@ -42,10 +42,7 @@ FILE *gpFile = NULL;
 HDC ghdc = NULL; // Handle device context
 HGLRC ghrc = NULL; // Handle to graphics rendering context 
 
-// rotation angles
-float angleTriangle = 0.0f;
-
-// solor system related variables
+// solar system related variables
 int Year = 0;
 int date = 0;
 GLUquadric * quadric = NULL;
@@ -420,13 +417,13 @@ void display(void)
 	// do view tranformation
 	gluLookAt(0.0f, 0.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
 		
-	// save above transformation into model vew matrix
+	// save above transformation into model view matrix
 	glPushMatrix();
 
 	// adjust the polls of spear of sun
 	glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
 
-	// set suns polygone property
+	// set suns polygon property
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	// make sun yellow
@@ -469,11 +466,7 @@ void display(void)
 
 void update(void)
 {
-	angleTriangle = angleTriangle + 0.1f;
-	if(angleTriangle >= 360.0f)
-	{
-		angleTriangle = angleTriangle - 360.0f;
-	}
+	// code
 }
 
 void uninitialize(void) {
