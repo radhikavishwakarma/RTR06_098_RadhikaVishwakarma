@@ -366,7 +366,7 @@ int initialize(void)
 
 	// From here OpenGL Code starts
 	// Tell OpenGL to choose the color to clear the screen
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 
 	return (0);
 }
