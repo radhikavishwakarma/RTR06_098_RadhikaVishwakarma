@@ -12,6 +12,8 @@
 
 // OpenGL related libraries
 #pragma comment(lib, "opengl32.lib")
+#pragma comment(lib,"GLU32.lib")
+#pragma comment(lib,"winmm.lib")
 
 // Macros
 #define WIN_WIDTH 800
@@ -202,6 +204,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 	{
 		case WM_CREATE:
 			ZeroMemory((void*) &wpPrev, sizeof(WINDOWPLACEMENT));
+			wpPrev.length = sizeof(WINDOWPLACEMENT);
+            PlaySound(TEXT("harry_potter.wav"), NULL, SND_ASYNC | SND_FILENAME);
 			break;
 		case WM_SETFOCUS:
 			gbActiveWindow = TRUE;
@@ -379,26 +383,25 @@ void display(void)
     drawCircle(angleCircle, translateCircleX, translateCircleY); // Called function
     drawLine(translateLineY); // Called function
 
-	
 	SwapBuffers(ghdc);
 }
 
 void update(void)
 {
-	angleTriangle = angleTriangle + 0.2f;
+	angleTriangle = angleTriangle + 0.3f;
 	if(angleTriangle >= 360.0f)
 	{
 		angleTriangle = angleTriangle - 360.0f;
 	}
 
-	angleCircle = angleCircle + 0.2f;
+	angleCircle = angleCircle + 0.3f;
 	if(angleCircle >= 360.0f)
 	{
 		angleCircle = angleCircle - 360.0f;
 	}
 
-	translateTriangleX += 0.0005f; 
-	translateTriangleY += 0.0005f;
+	translateTriangleX += 0.005f; 
+	translateTriangleY += 0.005f;
 	if (translateTriangleX >= 0.0f && translateTriangleY >= 0.0f)
 	{
 		translateTriangleX = 0.0f;
@@ -408,8 +411,8 @@ void update(void)
 	
 	if (isTriangleCentered == TRUE)
 	{
-		translateCircleX -= 0.0005f; 
-		translateCircleY += 0.0005f;
+		translateCircleX -= 0.005f; 
+		translateCircleY += 0.005f;
 		if (translateCircleX <= 0.0f && translateCircleY >= 0.0f)
 		{
 			translateCircleX = 0.0f;
@@ -420,7 +423,7 @@ void update(void)
 	
 	if (isCircleCentered == TRUE)
 	{
-		translateLineY -= 0.0005f;
+		translateLineY -= 0.005f;
 		if (translateLineY <= 0.0f)
 		{
 			translateLineY = 0.0f; 
