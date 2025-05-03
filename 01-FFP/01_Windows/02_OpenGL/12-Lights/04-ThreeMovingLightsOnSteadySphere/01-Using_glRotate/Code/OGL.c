@@ -1,11 +1,11 @@
-	// Win32 Header files
+// Win32 Header files
 #include<Windows.h>
 #include<stdio.h>
 #include<stdlib.h>
 
 // OpenGL related Header files
 #include<gl/GL.h>
-#include<gl/Glu.h>
+#include<gl/GLU.h>
 
 // Custom Header file
 #include "OGL.h"
@@ -42,25 +42,33 @@ FILE *gpFile = NULL;
 HDC ghdc = NULL; // Handle device context
 HGLRC ghrc = NULL; // Handle to graphics rendering context 
 
-// rotation angles
-float angleTriangle = 0.0f;
+GLUquadric *quadric = NULL;
 
-// 
+// light related variables
+BOOL bLight = FALSE;
 GLfloat lightAmbient0[] = {0.0f, 0.0f, 0.0f, 1.0f};
 GLfloat lightDiffuse0[] = {1.0f, 0.0f, 0.0f, 1.0f};
-GLfloat lightSpecular0[] = {1.0f, 0.0f, 0.0f, 1.0f};
-GLfloat lightPosition0[] = {-2.0f, 0.0f, 0.0f, 1.0f};
+GLfloat lightSpecular0[] = {0.0f, 0.0f, 0.0f, 1.0f};
+GLfloat lightPosition0[] = {0.0f, 0.0f, 0.0f, 1.0f};
 
 GLfloat lightAmbient1[] = {0.0f, 0.0f, 0.0f, 1.0f};
-GLfloat lightDiffuse1[] = {0.0f, 0.0f, 1.0f, 1.0f};
-GLfloat lightSpecular1[] = {0.0f, 0.0f, 1.0f, 1.0f};
-GLfloat lightPosition1[] = {2.0f, 0.0f, 0.0f, 1.0f};
+GLfloat lightDiffuse1[] = {0.0f, 1.0f, 0.0f, 1.0f};
+GLfloat lightSpecular1[] = {0.0f, 1.0f, 0.0f, 1.0f};
+GLfloat lightPosition1[] = {0.0f, 0.0f, 0.0f, 1.0f};
+
+GLfloat lightAmbient2[] = {0.0f, 0.0f, 0.0f, 1.0f};
+GLfloat lightDiffuse2[] = {0.0f, 0.0f, 1.0f, 1.0f};
+GLfloat lightSpecular2[] = {0.0f, 0.0f, 1.0f, 1.0f};
+GLfloat lightPosition2[] = {0.0f, 0.0f, 0.0f, 1.0f};
 
 GLfloat materialAmbient[] = {0.0f, 0.0f, 0.0f, 1.0f};
 GLfloat materialDiffuse[] = {1.0f, 1.0f, 1.0f, 1.0f};
 GLfloat materialSpecular[] = {1.0f, 1.0f, 1.0f, 1.0f};
 GLfloat materialShininess = 50.0f;
-BOOL bLight = FALSE;
+
+GLfloat lightAngle0 = 0.0f;
+GLfloat lightAngle1 = 0.0f;
+GLfloat lightAngle2 = 0.0f;
 
 
 // Entry Point Function
@@ -372,9 +380,8 @@ int initialize(void)
 		fprintf(gpFile, "wglMakeCurrent function failed!\n");
 		return(-5);
 	}
-
-
-	// depth related code
+	
+	// Depth related code
 	glShadeModel(GL_SMOOTH);
 	glClearDepth(1.0f);
 	glEnable(GL_DEPTH_TEST);
@@ -385,26 +392,36 @@ int initialize(void)
 	// Tell OpenGL to choose the color to clear the screen
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
-	// Light 0 configration
+	// initialize quadric
+	quadric = gluNewQuadric();
+
+	// set poylgon mode
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	
+	// red light
 	glLightfv(GL_LIGHT0, GL_AMBIENT, lightAmbient0);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, lightDiffuse0);
 	glLightfv(GL_LIGHT0, GL_SPECULAR, lightSpecular0);
-	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition0);
 	glEnable(GL_LIGHT0);
-	
-	// Light 1 configration
+
+	// green light
 	glLightfv(GL_LIGHT1, GL_AMBIENT, lightAmbient1);
 	glLightfv(GL_LIGHT1, GL_DIFFUSE, lightDiffuse1);
 	glLightfv(GL_LIGHT1, GL_SPECULAR, lightSpecular1);
-	glLightfv(GL_LIGHT1, GL_POSITION, lightPosition1);
 	glEnable(GL_LIGHT1);
+
+	// blue light
+	glLightfv(GL_LIGHT2, GL_AMBIENT, lightAmbient2);
+	glLightfv(GL_LIGHT2, GL_DIFFUSE, lightDiffuse2);
+	glLightfv(GL_LIGHT2, GL_SPECULAR, lightSpecular2);
+	glEnable(GL_LIGHT2);
 
 	// Material configration
 	glMaterialfv(GL_FRONT, GL_AMBIENT, materialAmbient);
 	glMaterialfv(GL_FRONT, GL_DIFFUSE, materialDiffuse);
 	glMaterialfv(GL_FRONT, GL_SPECULAR, materialSpecular);
-	glMaterialf(GL_FRONT, GL_SHININESS, materialShininess); 
-	
+	glMaterialf(GL_FRONT, GL_SHININESS, materialShininess);
+
 	// warm up resize
 	resize(WIN_WIDTH, WIN_HEIGHT);
 
@@ -429,8 +446,8 @@ void resize(int width, int height)
 	// set to identity matrix
 	glLoadIdentity();
 
-	// do perpective projection
-	gluPerspective(45.0f, (GLfloat) width / (GLfloat) height, 0.1f, 100.0f);
+	// do perspective projection
+	gluPerspective(45.0f, (GLfloat)width / (GLfloat)height, 0.1f, 100.0f);
 }
 
 void display(void)
@@ -445,60 +462,65 @@ void display(void)
 	// Set it to identity matrix
 	glLoadIdentity();
 
-	// Translate Triangle backword
+	glPushMatrix();
+
+	// Red light rotation
+	glPushMatrix();
+	glRotatef(lightAngle0, 1.0f, 0.0f, 0.0f);
+	lightPosition0[2] = lightAngle0;
+	glLightfv(GL_LIGHT0, GL_POSITION, lightPosition0);
+	glPopMatrix();
+
+	// Green light rotation
+	glPushMatrix();
+	glRotatef(lightAngle1, 0.0f, 1.0f, 0.0f);
+	lightPosition1[0] = lightAngle1;
+	glLightfv(GL_LIGHT1, GL_POSITION, lightPosition1);
+	glPopMatrix();
+
+	// Blue light rotation
+	glPushMatrix();
+	glRotatef(lightAngle2, 0.0f, 1.0f, 0.0f);
+	lightPosition1[1] = lightAngle2;
+	glLightfv(GL_LIGHT2, GL_POSITION, lightPosition2);
+	glPopMatrix();
+
+	// translate sphere backwards
 	glTranslatef(0.0f, 0.0f, -5.0f);
-	glRotatef(angleTriangle, 0.0f, 1.0f, 0.0f);
-
 	
-	// Draw triangle here
-	glBegin(GL_TRIANGLES);
-	// Front face
-	glNormal3f(0.0f, 0.447214f, 0.894428f);
-	// Apex
-	glVertex3f(0.0f, 1.0f, 0.0f);
-	// left bottom
-    glVertex3f(-1.0f, -1.0f, 1.0f);
-	// right bottom
-    glVertex3f(1.0f, -1.0f, 1.0f);
+	glEnable(GL_SMOOTH);
+	
+	// set spheres polygon property
+	// glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	gluSphere(quadric, 0.75f, 30, 30);
 
-	// right face
-	glNormal3f(0.894428f, 0.447214f, 0.0f);
-	// Apex
-    glVertex3f(0.0f, 1.0f, 0.0f);
-	// left bottom
-	glVertex3f(1.0f, -1.0f, 1.0f);
-	// right bottom
-	glVertex3f(1.0f, -1.0f, -1.0f);
-
-	// Back face
-	glNormal3f(0.0f, -0.447214f, -0.894428f);
-	// Apex
-    glVertex3f(0.0f, 1.0f, 0.0f);
-	// left bottom
-    glVertex3f(1.0f, -1.0f, -1.0f);
-	// right bottom
-    glVertex3f(-1.0f, -1.0f, -1.0f);
-
-	// Left face
-	glNormal3f(-0.894428f, -0.447214f, 0.0f);
-	// Apex
-    glVertex3f(0.0f, 1.0f, 0.0f);
-	// left bottom
-    glVertex3f(-1.0f, -1.0f, -1.0f);
-	// right bottom
-    glVertex3f(-1.0f, -1.0f, 1.0f);
-
-    glEnd();	
+	glPopMatrix();
 
 	SwapBuffers(ghdc);
 }
 
 void update(void)
 {
-	angleTriangle = angleTriangle + 0.05f;
-	if(angleTriangle >= 360.0f)
+	// code
+	// update red light position
+	lightAngle0 += 0.05f;
+	if(lightAngle0 >= 360.0)
 	{
-		angleTriangle = angleTriangle - 360.0f;
+		lightAngle0 = lightAngle0 - 360.f;
+	}
+
+	// update green light position
+	lightAngle1 += 0.05f;
+	if(lightAngle1 >= 360.0)
+	{
+		lightAngle1 = lightAngle1 - 360.f;
+	}
+
+	// update blue light position
+	lightAngle2 += 0.05f;
+	if(lightAngle2 >= 360.0)
+	{
+		lightAngle2 = lightAngle2 - 360.f;
 	}
 }
 
@@ -518,6 +540,12 @@ void uninitialize(void) {
 	if (wglGetCurrentContext() == ghrc)
 	{
 		wglMakeCurrent(NULL, NULL);
+	}
+
+	if (quadric)
+	{
+		gluDeleteQuadric(quadric);
+		quadric = NULL;
 	}
 	
 	// Delete the rendering context
