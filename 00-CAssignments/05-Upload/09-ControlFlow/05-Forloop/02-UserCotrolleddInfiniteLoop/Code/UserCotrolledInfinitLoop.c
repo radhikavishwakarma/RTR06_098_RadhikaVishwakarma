@@ -6,7 +6,7 @@ int main(void)
 
     //code
     printf("\n\n");
-    printf("Once the Infinite Loop Begis,ENter 'Q' or 'q' to Quit The Infinite For Loop :\n\n");
+    printf("Once the Infinite Loop Begins ,ENter 'Q' or 'q' to Quit The Infinite For Loop :\n\n");
     printf("Enter 'Y' or 'y' To Inifinite User Cotrolled Infinite Loop :");
     printf("\n\n");
     option = getch();

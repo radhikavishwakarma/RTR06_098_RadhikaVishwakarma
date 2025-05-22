@@ -400,8 +400,8 @@ void update(void)
 		angleCircle = angleCircle - 360.0f;
 	}
 
-	translateTriangleX += 0.005f; 
-	translateTriangleY += 0.005f;
+	translateTriangleX += 0.0005f; 
+	translateTriangleY += 0.0005f;
 	if (translateTriangleX >= 0.0f && translateTriangleY >= 0.0f)
 	{
 		translateTriangleX = 0.0f;
@@ -411,8 +411,8 @@ void update(void)
 	
 	if (isTriangleCentered == TRUE)
 	{
-		translateCircleX -= 0.005f; 
-		translateCircleY += 0.005f;
+		translateCircleX -= 0.0005f; 
+		translateCircleY += 0.0005f;
 		if (translateCircleX <= 0.0f && translateCircleY >= 0.0f)
 		{
 			translateCircleX = 0.0f;
@@ -423,7 +423,7 @@ void update(void)
 	
 	if (isCircleCentered == TRUE)
 	{
-		translateLineY -= 0.005f;
+		translateLineY -= 0.0005f;
 		if (translateLineY <= 0.0f)
 		{
 			translateLineY = 0.0f; 
