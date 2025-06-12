@@ -1,0 +1,4 @@
+Program started successfully
+Loading a transparent image !!!
+Initialized function completed successfully
+Program terminated successfully

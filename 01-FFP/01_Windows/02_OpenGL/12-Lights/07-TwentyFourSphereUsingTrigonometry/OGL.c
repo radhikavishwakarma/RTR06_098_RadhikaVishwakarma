@@ -1164,17 +1164,26 @@ void update(void)
 	// update angle for x rotation
 	angleForXRotation = angleForXRotation + 0.1f;
 
-	if (angleForXRotation >= 360.0f);
+	if (angleForXRotation >= 360.0f)
+	{
+		angleForXRotation = angleForXRotation - 360.0f;
+	}
 
 	// update angle for y rotation
 	angleForYRotation = angleForYRotation + 0.1f;
 
-	if (angleForYRotation >= 360.0f);
+	if (angleForYRotation >= 360.0f)
+	{
+		angleForYRotation = angleForYRotation - 360.0f;
+	}
 
 	// update angle for z rotation
 	angleForZRotation = angleForZRotation + 0.1f;
 
-	if (angleForZRotation >= 360.0f);
+	if (angleForZRotation >= 360.0f)
+	{
+		angleForZRotation = angleForZRotation - 360.0f;
+	}
 }
 
 void uninitialize(void) {
