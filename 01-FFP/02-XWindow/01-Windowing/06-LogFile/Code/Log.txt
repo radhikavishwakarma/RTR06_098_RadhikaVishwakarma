@@ -1,0 +1,5 @@
+Program started successfully!!
+Window is resized
+Window is resized
+MapNotify event is received
+Window got focus
