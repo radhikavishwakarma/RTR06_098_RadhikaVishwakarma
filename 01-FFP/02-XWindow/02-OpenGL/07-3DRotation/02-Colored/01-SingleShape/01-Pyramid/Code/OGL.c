@@ -294,7 +294,7 @@ int initialize(void)
 
     glXMakeCurrent(gpDisplay, window, glxContext);
 
-    // depth related code
+    // Depth related code
 	glShadeModel(GL_SMOOTH);
 	glClearDepth(1.0f);
 	glEnable(GL_DEPTH_TEST);
@@ -359,34 +359,46 @@ void display(void)
 	glBegin(GL_TRIANGLES);
 	// Front face
 	// Apex
+    glColor3f(1.0f, 0.0f, 0.0f);
 	glVertex3f(0.0f, 1.0f, 0.0f);
 	// left bottom
+    glColor3f(0.0f, 1.0f, 0.0f);
     glVertex3f(-1.0f, -1.0f, 1.0f);
 	// right bottom
+    glColor3f(0.0f, 0.0f, 1.0f);
     glVertex3f(1.0f, -1.0f, 1.0f);
 
 	// right face
 	// Apex
+    glColor3f(1.0f, 0.0f, 0.0f);
     glVertex3f(0.0f, 1.0f, 0.0f);
 	// left bottom
+    glColor3f(0.0f, 0.0f, 1.0f);
 	glVertex3f(1.0f, -1.0f, 1.0f);
 	// right bottom
+    glColor3f(0.0f, 1.0f, 0.0f);
 	glVertex3f(1.0f, -1.0f, -1.0f);
 
 	// Back face
 	// Apex
+    glColor3f(1.0f, 0.0f, 0.0f);
     glVertex3f(0.0f, 1.0f, 0.0f);
 	// left bottom
+    glColor3f(0.0f, 1.0f, 0.0f);
     glVertex3f(1.0f, -1.0f, -1.0f);
 	// right bottom
+    glColor3f(0.0f, 0.0f, 1.0f);
     glVertex3f(-1.0f, -1.0f, -1.0f);
 
 	// Left face
 	// Apex
+    glColor3f(1.0f, 0.0f, 0.0f);
     glVertex3f(0.0f, 1.0f, 0.0f);
 	// left bottom
+    glColor3f(0.0f, 0.0f, 1.0f);
     glVertex3f(-1.0f, -1.0f, -1.0f);
 	// right bottom
+    glColor3f(0.0f, 1.0f, 0.0f);
     glVertex3f(-1.0f, -1.0f, 1.0f);
 
     glEnd();

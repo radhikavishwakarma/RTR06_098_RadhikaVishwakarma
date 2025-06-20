@@ -65,6 +65,7 @@ int main(void)
         GLX_GREEN_SIZE, 8,
         GLX_BLUE_SIZE, 8,
         GLX_ALPHA_SIZE, 8,
+        GLX_DEPTH_SIZE, 24,  // MESA recommends 24 bit depth
         None
     };
 
@@ -294,6 +295,13 @@ int initialize(void)
 
     glXMakeCurrent(gpDisplay, window, glxContext);
 
+    // Depth related code
+	glShadeModel(GL_SMOOTH);
+	glClearDepth(1.0f);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+
     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 
     return(0);
@@ -335,7 +343,7 @@ void resize(int width, int height)
 void display(void)
 {
     // code
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     // Set Matrix to Model View mode
 	glMatrixMode(GL_MODELVIEW);
