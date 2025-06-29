@@ -1,0 +1,7 @@
+Program started successfully!!
+OPENGL INFORMATON-----------------
+OpenGL Vendor : (null)
+OpenGL Rendorer : (null)
+OpenGL Version : (null)/n-----------------
+Initialize function completed sucessfully!!!
+Program terminated successfully

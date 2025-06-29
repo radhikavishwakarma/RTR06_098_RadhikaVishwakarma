@@ -4,15 +4,17 @@
 #include<stdlib.h>
 
 // OpenGL related Header files
+#include <GL/glew.h> // This header file must be included befor gl/GL.h
 #include<gl/GL.h>
-#include<gl/Glu.h>
 
 // Custom Header file
 #include "OGL.h"
+#include "vmath.h"
+using namespace vmath;
 
 // OpenGL related libraries
+#pragma comment(lib, "glew32.lib")
 #pragma comment(lib, "opengl32.lib")
-#pragma comment(lib, "GLU32.lib")
 
 // Macros
 #define WIN_WIDTH 800
@@ -42,10 +44,8 @@ FILE *gpFile = NULL;
 HDC ghdc = NULL; // Handle device context
 HGLRC ghrc = NULL; // Handle to graphics rendering context 
 
-// robotic arm reated variables
-int shoulder = 0;
-int elbow = 0;
-GLUquadric * quadric = NULL;
+// Shader related global variables
+GLuint shaderProgramObject = 0;
 
 // Entry Point Function
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int iCmdShow)
@@ -105,8 +105,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLi
 		szAppName,
 		TEXT("Radhika Vishwakarma"),
 		WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | WS_VISIBLE,
-		x,  // update as homework
-		y,  // update as homework
+		x,
+		y,
 		WIN_WIDTH,
 		WIN_HEIGHT,
 		NULL,
@@ -221,7 +221,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 			{
 				case 'F':
 				case 'f':
-									if (gbFullScreen == FALSE)
+					if (gbFullScreen == FALSE)
 					{
 						toggleFullScreen();
 						gbFullScreen = TRUE;
@@ -232,19 +232,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 						gbFullScreen = FALSE;
 					}
 					break;
-					case 'S':
-						shoulder = (shoulder + 3) % 360;
-					break;
-					case 's':
-						shoulder = (shoulder - 3) % 360;
-					break;
-					case 'E':
-						elbow = (elbow + 3) % 360;
-					break;
-					case 'e':
-						elbow =(elbow + 3) % 360;
-					break;
-					
 				default:
 					break;
 			}
@@ -298,10 +285,14 @@ int initialize(void)
 {
 	// function declaration
 	void resize(int, int);
+	void printGLInfo(void);
+	void uninitialize(void);
 
 	// local variable declaration
 	PIXELFORMATDESCRIPTOR pfd;
 	int iPixelFormatIndex = 0;
+
+	GLenum glewResult;
 
     // code
 	// PixelFormatDescriptor initialization
@@ -357,25 +348,164 @@ int initialize(void)
 		return(-5);
 	}
 
-	// depth related code
-	glShadeModel(GL_SMOOTH);
+	// Initialize GLEW
+	glewResult = glewInit();
+	
+	if (glewResult != GLEW_OK)
+	{
+		fprintf(gpFile, "glewInit function failed!\n");
+		return(-6);
+	}
+
+	printGLInfo();
+
+	// VERTEX SHADER
+	// 1. Write shader source code
+	const GLchar *vertexShaderSourceCode = 
+	"#version 460 core\n" \
+	"void main(void)\n" \
+	"{\n" \
+	"}\n";
+
+	// 2. Create the shader object
+	GLuint vertexShaderObject = glCreateShader(GL_VERTEX_SHADER);
+
+	// 3. Give the shader source code to the shader object
+	glShaderSource(vertexShaderObject, 1, (const GLchar**)&vertexShaderSourceCode, NULL);
+
+	// 4. Compile the shader programmatically
+	glCompileShader(vertexShaderObject);
+
+	// 5. Do shader compilation error checking
+	GLint status = 0;
+	GLint infoLogLength = 0;
+	GLchar* szInfoLog = NULL;
+
+	glGetShaderiv(vertexShaderObject, GL_COMPILE_STATUS, &status);
+	if (status == GL_FALSE)
+	{
+		glGetShaderiv(vertexShaderObject, GL_INFO_LOG_LENGTH, &infoLogLength);
+		if (infoLogLength > 0)
+		{
+			szInfoLog = (GLchar*) malloc(infoLogLength * sizeof(GLchar));
+			if (szInfoLog != NULL)
+			{
+				glGetShaderInfoLog(vertexShaderObject, infoLogLength, NULL, szInfoLog);
+				fprintf(gpFile, "VERTEX SHADER COMPILATION LOG = %s\n", szInfoLog);
+				free(szInfoLog);
+				szInfoLog = NULL;
+			}
+		}
+		uninitialize();
+	}
+	
+	// FRAGMENT SHADER
+	// 1. Write shader source code
+	const GLchar* fragmentShaderSourceCode = 
+	"#version 460 core\n" \
+	"void main(void)\n" \
+	"{\n" \
+	"}\n";
+
+	// 2. Create the shader object
+	GLuint fragmentShaderObject = glCreateShader(GL_FRAGMENT_SHADER);
+
+	// 3. Give the shader source code to the shader object
+	glShaderSource(fragmentShaderObject, 1, (const GLchar**)&fragmentShaderSourceCode, NULL);
+
+	// 4. Compile the shader programmatically
+	glCompileShader(fragmentShaderObject);
+
+	// 5. Do shader compilation error checking
+	status = 0;
+	infoLogLength = 0;
+	szInfoLog = NULL;
+
+	glGetShaderiv(fragmentShaderObject, GL_COMPILE_STATUS, &status);
+	if (status == GL_FALSE)
+	{
+		glGetShaderiv(fragmentShaderObject, GL_INFO_LOG_LENGTH, &infoLogLength);
+		if (infoLogLength > 0)
+		{
+			szInfoLog = (GLchar*) malloc(infoLogLength * sizeof(GLchar));
+			if (szInfoLog != NULL)
+			{
+				glGetShaderInfoLog(fragmentShaderObject, infoLogLength, NULL, szInfoLog);
+				fprintf(gpFile, "FRAGMENT SHADER COMPILATION LOG = %s\n", szInfoLog);
+				free(szInfoLog);
+				szInfoLog = NULL;
+			}
+		}
+		uninitialize();
+	}
+
+	// Create, attach, link shader program object
+	shaderProgramObject = glCreateProgram();
+	glAttachShader(shaderProgramObject, vertexShaderObject);
+	glAttachShader(shaderProgramObject, fragmentShaderObject);
+	glLinkProgram(shaderProgramObject);
+
+	// Link error checking
+	status = 0;
+	infoLogLength = 0;
+	szInfoLog = NULL;
+
+	glGetProgramiv(shaderProgramObject, GL_LINK_STATUS, &status);
+	if (status == GL_FALSE)
+	{
+		glGetProgramiv(shaderProgramObject, GL_INFO_LOG_LENGTH, &infoLogLength);
+		if (infoLogLength > 0)
+		{
+			szInfoLog = (GLchar*) malloc(infoLogLength * sizeof(GLchar));
+			if (szInfoLog != NULL)
+			{
+				glGetProgramInfoLog(shaderProgramObject, infoLogLength, NULL, szInfoLog);
+				fprintf(gpFile, "SHADER PROGRAM LINK LOG = %s\n", szInfoLog);
+				free(szInfoLog);
+				szInfoLog = NULL;
+			}
+		}
+		uninitialize();
+	}
+
+	// Depth related code
 	glClearDepth(1.0f);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
-	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 
 	// From here OpenGL Code starts
 	// Tell OpenGL to choose the color to clear the screen
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
-	// Intialize Quadric 
-	quadric = gluNewQuadric();
-	quadric = gluNewQuadric();
+	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
 	
 	// warm up resize
 	resize(WIN_WIDTH, WIN_HEIGHT);
 
     return(0);
+}
+
+void printGLInfo(void)
+{
+	// variable declaration
+	GLint numExtensions, i;
+	// code
+	// print OpenGL Info
+	fprintf(gpFile, "OPENGL INFORMATION\n");
+	fprintf(gpFile, "--------------------\n");
+	fprintf(gpFile, "OpenGL Vendor : %s\n", glGetString(GL_VENDOR));
+	fprintf(gpFile, "OpenGL Renderer : %s\n", glGetString(GL_RENDERER));
+	fprintf(gpFile, "OpenGL Version : %s\n", glGetString(GL_VERSION));
+	fprintf(gpFile, "GLSL Version : %s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
+	fprintf(gpFile, "--------------------\n");
+	
+	// get number of extensions
+	glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+	
+	// print OpenGL Extensions
+	for (int i = 0; i < numExtensions; i++)
+	{
+		fprintf(gpFile, "%s\n", glGetStringi(GL_EXTENSIONS, i));
+	}
+	
 }
 
 void resize(int width, int height)
@@ -389,69 +519,29 @@ void resize(int width, int height)
 
 	// Set the viewport
 	glViewport(0, 0, (GLsizei) width, (GLsizei) height);
-
-	// set matrix projection mode
-	glMatrixMode(GL_PROJECTION);
-
-	// set to identity matrix
-	glLoadIdentity();
-
-	// do perpective projection
-	gluPerspective(45.0f, (GLfloat) width / (GLfloat) height, 0.1f, 100.0f);
 }
 
 void display(void)
 {
     // code
 	// clear OpenGL buffers
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	// Set Matrix to Model View mode
-	glMatrixMode(GL_MODELVIEW);
+	// use shader program object
+	glUseProgram(shaderProgramObject);
 
-	// Set it to identity matrix
-	glLoadIdentity();
-	// Both aram and forearm filld polygon
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	// unuse shader program object
+	glUseProgram(0);
 
-	glTranslatef(0.0f, 0.0f, -12.0f);
-	// push this matrix into matrixstac
-	glPushMatrix();
-	// Do basic translation common to both aram and forearam
-	// CODE FOR ARAM
-	glRotatef((GLfloat)shoulder, 0.0f, 0.0f, 1.0f);
-	glTranslatef(1.0f, 0.0f, 0.0f);
-	glPushMatrix();
-	glScalef(2.1f, 0.6f, 1.0f);
-
-	glColor3f(0.5f, 0.35f, 0.05f);
-	gluSphere(quadric, 0.5f, 10, 10);
-	glPopMatrix();
-
-	// CODE FOR FOREARAM
-	glTranslatef(1.0f, 0.0f, 0.0f);
-	glRotatef((GLfloat)elbow, 0.0f, 0.0f, 1.0f);
-	glTranslatef(1.0f, 0.0f, 0.0f);
-	glPushMatrix();
-	glScalef(2.1f, 0.6f, 1.0f);
-
-	glColor3f(0.5f, 0.35f, 0.05f);
-	gluSphere(quadric, 0.5f, 10, 10);
-	glPopMatrix();
-
-	// Common to both 
-	glPopMatrix();
-	
 	SwapBuffers(ghdc);
 }
 
 void update(void)
 {
-	
+	// code
 }
 
 void uninitialize(void) {
-	
 	// function declarations
 	void toggleFullScreen(void);
 
@@ -463,21 +553,40 @@ void uninitialize(void) {
 		gbFullScreen = FALSE;
 	}
 
+	// Detach, delete shader objects and delete shader program object
+	if (shaderProgramObject)
+	{
+		glUseProgram(shaderProgramObject);
+		GLint numShaders;
+		glGetProgramiv(shaderProgramObject, GL_ATTACHED_SHADERS, &numShaders);
+		if (numShaders > 0)
+		{
+			GLuint* pShaders = (GLuint*) malloc(numShaders * sizeof(GLuint));
+			if (pShaders != NULL)
+			{
+				glGetAttachedShaders(shaderProgramObject, numShaders, NULL, pShaders);
+				for (GLint i = 0; i < numShaders; i++)
+				{
+					glDetachShader(shaderProgramObject, pShaders[i]);
+					glDeleteShader(pShaders[i]);
+					pShaders[i] = 0;
+				}
+			}
+			free(pShaders);
+			pShaders = 0;
+		}
+		glUseProgram(0);
+		glDeleteProgram(shaderProgramObject);
+		shaderProgramObject = 0;
+	}
+	
+
 	// Make hdc as current context by releasing rendering context as current context
 	if (wglGetCurrentContext() == ghrc)
 	{
 		wglMakeCurrent(NULL, NULL);
 	}
-	if (quadric)
-	{
-		gluDeleteQuadric(quadric);
-		quadric = NULL;
-	}
-	if (quadric)
-	{
-		gluDeleteQuadric(quadric);
-		quadric = NULL;
-	}
+	
 	// Delete the rendering context
 	if(ghrc)
 	{
