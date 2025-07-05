@@ -10,6 +10,7 @@
 // Custom Header file
 #include "OGL.h"
 #include "vmath.h"
+
 using namespace vmath;
 
 // OpenGL related libraries
@@ -23,7 +24,6 @@ using namespace vmath;
 // global function declarations
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
-// global variable declaration
 // variables related to fullscreen
 BOOL gbFullScreen = FALSE;
 HWND ghwnd = NULL;
@@ -46,6 +46,17 @@ HGLRC ghrc = NULL; // Handle to graphics rendering context
 
 // Shader related global variables
 GLuint shaderProgramObject = 0;
+
+enum{
+	AMC_ATTRIBUTE_POSITION = 0,
+};
+
+GLuint vao = 0;
+GLuint vbo_position;
+
+GLuint mvpMatrixUniform = 0;
+
+mat4 orthographicProjectionMatrix; 
 
 // Entry Point Function
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int iCmdShow)
@@ -249,7 +260,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 	return(DefWindowProc(hWnd, iMsg, wParam, lParam));
 }
 
-// functions which don't have body are called as stub functions
 void toggleFullScreen(void)
 {
 	// Variable declarations
@@ -363,8 +373,11 @@ int initialize(void)
 	// 1. Write shader source code
 	const GLchar *vertexShaderSourceCode = 
 	"#version 460 core\n" \
+	"in vec4 aPosition;\n" \
+	"uniform mat4 uMVPMatrix;\n" \
 	"void main(void)\n" \
 	"{\n" \
+	"gl_Position = uMVPMatrix * aPosition;\n" \
 	"}\n";
 
 	// 2. Create the shader object
@@ -400,23 +413,20 @@ int initialize(void)
 	}
 	
 	// FRAGMENT SHADER
-	// 1. Write shader source code
 	const GLchar* fragmentShaderSourceCode = 
 	"#version 460 core\n" \
+	"out vec4 fragColor;\n" \
 	"void main(void)\n" \
 	"{\n" \
+	"fragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);\n" \
 	"}\n";
 
-	// 2. Create the shader object
 	GLuint fragmentShaderObject = glCreateShader(GL_FRAGMENT_SHADER);
 
-	// 3. Give the shader source code to the shader object
 	glShaderSource(fragmentShaderObject, 1, (const GLchar**)&fragmentShaderSourceCode, NULL);
 
-	// 4. Compile the shader programmatically
 	glCompileShader(fragmentShaderObject);
 
-	// 5. Do shader compilation error checking
 	status = 0;
 	infoLogLength = 0;
 	szInfoLog = NULL;
@@ -442,7 +452,10 @@ int initialize(void)
 	// Create, attach, link shader program object
 	shaderProgramObject = glCreateProgram();
 	glAttachShader(shaderProgramObject, vertexShaderObject);
-	glAttachShader(shaderProgramObject, fragmentShaderObject);
+	glAttachShader(shaderProgramObject, fragmentShaderObject);\
+
+	// Bind shader attribute at a certain index in shader to save index in host program
+	glBindAttribLocation(shaderProgramObject, AMC_ATTRIBUTE_POSITION, "aPosition");
 	glLinkProgram(shaderProgramObject);
 
 	// Link error checking
@@ -468,6 +481,31 @@ int initialize(void)
 		uninitialize();
 	}
 
+	// Get the required uniform location from the shader
+	mvpMatrixUniform = glGetUniformLocation(shaderProgramObject, "uMVPMatrix");
+
+	// Provide vertex position, color, normal, texCoord etc.
+	const GLfloat triangle_position[] = {
+		0.0f, 50.0f, 0.0f,
+		-50.0f, -50.0f, 0.0f,
+		50.0f, -50.0f, 0.0f,
+	};
+
+	// VERTEX ARRAY OBJECT FOR ARRAYS OF VERTEX OBJECT
+	glGenVertexArrays(1, &vao);
+	// Bind vertex array object
+	glBindVertexArray(vao);
+	// POSITION
+	glGenBuffers(1, &vbo_position);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_position);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(triangle_position), triangle_position, GL_STATIC_DRAW);
+	glVertexAttribPointer(AMC_ATTRIBUTE_POSITION, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(AMC_ATTRIBUTE_POSITION);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	// unbind VAO
+	glBindVertexArray(0);
+
 	// Depth related code
 	glClearDepth(1.0f);
 	glEnable(GL_DEPTH_TEST);
@@ -476,6 +514,8 @@ int initialize(void)
 	// From here OpenGL Code starts
 	// Tell OpenGL to choose the color to clear the screen
 	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
+
+	orthographicProjectionMatrix = mat4::identity(); // this is similar to glLoadIdentity() in resize
 	
 	// warm up resize
 	resize(WIN_WIDTH, WIN_HEIGHT);
@@ -519,6 +559,29 @@ void resize(int width, int height)
 
 	// Set the viewport
 	glViewport(0, 0, (GLsizei) width, (GLsizei) height);
+
+	// do orthographic projection
+	if (width <= height)
+	{
+		orthographicProjectionMatrix = vmath::ortho(
+			-100.0f,
+			100.0f,
+			(-100.0f * ((GLfloat) height/ (GLfloat) width)),
+			(100.0f * ((GLfloat) height/ (GLfloat) width)),
+			-100.0f,
+			100.0f);
+	}
+	else
+	{
+		orthographicProjectionMatrix = vmath::ortho(
+			(-100.0f * ((GLfloat) width /(GLfloat) height)),
+			(100.0f * ((GLfloat) width /(GLfloat) height)),
+			-100.0f,
+			100.0f,
+			-100.0f,
+			100.0f
+		);
+	}
 }
 
 void display(void)
@@ -529,6 +592,23 @@ void display(void)
 
 	// use shader program object
 	glUseProgram(shaderProgramObject);
+
+	// Transformations
+	mat4 modelViewMatrix = mat4::identity(); // this is similar to glLoadIdentity() in display for model view matrix
+	mat4 modelViewProjectionMatrix = mat4::identity();
+	modelViewProjectionMatrix = orthographicProjectionMatrix * modelViewMatrix; // order is important in matrix multiplication
+
+	// send above matrix to the shader in "uniform"
+	glUniformMatrix4fv(mvpMatrixUniform, 1, GL_FALSE, modelViewProjectionMatrix);
+
+	// Bind with VAO
+	glBindVertexArray(vao);
+
+	// Draw the vertex arrays
+	glDrawArrays(GL_TRIANGLES, 0, 3);
+
+	// Unbind with VAO
+	glBindVertexArray(0);
 
 	// unuse shader program object
 	glUseProgram(0);
@@ -551,6 +631,20 @@ void uninitialize(void) {
 	{
 		toggleFullScreen();
 		gbFullScreen = FALSE;
+	}
+
+	// Free vbo_position
+	if (vbo_position)
+	{
+		glDeleteBuffers(1, &vbo_position);
+		vbo_position = 0;
+	}
+	
+	// Free VAO
+	if (vao)
+	{
+		glDeleteVertexArrays(1, &vao);
+		vao = 0;
 	}
 
 	// Detach, delete shader objects and delete shader program object
