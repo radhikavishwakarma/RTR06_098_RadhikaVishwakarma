@@ -54,11 +54,8 @@ enum{
 	AMC_ATTRIBUTE_TEXCOORD,
 };
 
-GLuint vao_pyramid = 0;
 GLuint vao_cube = 0;
-GLuint vbo_position_pyramid;
 GLuint vbo_position_cube;
-GLuint vbo_texcoord_pyramid = 0;
 GLuint vbo_texcoord_cube = 0;
 
 GLuint mvpMatrixUniform = 0;
@@ -66,11 +63,9 @@ GLuint mvpMatrixUniform = 0;
 mat4 perspectiveProjectionMatrix; 
 
 // Rotation angles
-float anglePyramid = 0.0f;
 float angleCube = 0.0f;
 
 // taxture related global variables
-GLuint texture_stone;
 GLuint texture_kundali;
 GLuint textureSamplerUniform;
 
@@ -515,50 +510,6 @@ int initialize(void)
 	textureSamplerUniform = glGetUniformLocation(shaderProgramObject, "uTextureSampler");
 
 	// Provide vertex position, color, normal, texCoord etc.
-	const GLfloat pyramid_position[] = {
-		// front
-		0.0f,  1.0f,  0.0f, // front-top
-		-1.0f, -1.0f,  1.0f, // front-left
-		1.0f, -1.0f,  1.0f, // front-right
-		
-		// right
-		0.0f,  1.0f,  0.0f, // right-top
-		1.0f, -1.0f,  1.0f, // right-left
-		1.0f, -1.0f, -1.0f, // right-right
-
-		// back
-		0.0f,  1.0f,  0.0f, // back-top
-		1.0f, -1.0f, -1.0f, // back-left
-		-1.0f, -1.0f, -1.0f, // back-right
-
-		// left
-		0.0f,  1.0f,  0.0f, // left-top
-		-1.0f, -1.0f, -1.0f, // left-left
-		-1.0f, -1.0f,  1.0f, // left-right
-	};
-
-	const GLfloat pyramid_texCoords[] = {
-		// front
-		0.5, 1.0, // front-top
-		0.0, 0.0, // front-left
-		1.0, 0.0, // front-right
-
-		// right
-		0.5, 1.0, // right-top
-		1.0, 0.0, // right-left
-		0.0, 0.0, // right-right
-
-		// back
-		0.5, 1.0, // back-top
-		0.0, 0.0, // back-left
-		1.0, 0.0, // back-right
-
-		// left
-		0.5, 1.0, // left-top
-		1.0, 0.0, // left-left
-		0.0, 0.0, // left-right
-	};
-
 	const GLfloat cube_position[] = {
 		// front
 		1.0f,  1.0f,  1.0f, // top-right of front
@@ -635,30 +586,6 @@ int initialize(void)
 		1.0f, 0.0f, // bottom-right of bottom
 	};
 
-	// PYRAMID
-	// VERTEX ARRAY OBJECT FOR ARRAYS OF VERTEX OBJECT
-	glGenVertexArrays(1, &vao_pyramid);
-	// Bind vertex array object
-	glBindVertexArray(vao_pyramid);
-	// POSITION
-	glGenBuffers(1, &vbo_position_pyramid);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_position_pyramid);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(pyramid_position), pyramid_position, GL_STATIC_DRAW);
-	glVertexAttribPointer(AMC_ATTRIBUTE_POSITION, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(AMC_ATTRIBUTE_POSITION);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	// COLOR
-	glGenBuffers(1, &vbo_texcoord_pyramid);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_texcoord_pyramid);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(pyramid_texCoords), pyramid_texCoords, GL_STATIC_DRAW);
-	glVertexAttribPointer(AMC_ATTRIBUTE_TEXCOORD, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(AMC_ATTRIBUTE_TEXCOORD);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	// unbind VAO
-	glBindVertexArray(0);
-
 	// CUBE
 	// VERTEX ARRAY OBJECT FOR ARRAYS OF VERTEX OBJECT
 	glGenVertexArrays(1, &vao_cube);
@@ -691,13 +618,6 @@ int initialize(void)
 	// From here OpenGL Code starts
 	// Tell OpenGL to choose the color to clear the screen
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
-	// load textures
-	if(loadGLTexture (&texture_stone, MAKEINTRESOURCE (IDBITMAP_STONE)) == FALSE)
-	{
-		fprintf(gpFile,"loadGLTexture stone texture failed \n");
-		return (-6);
-	}
 
 	// load textures
 	if (loadGLTexture (& texture_kundali, MAKEINTRESOURCE (IDBITMAP_KUNDALI)) == FALSE)
@@ -800,40 +720,11 @@ void display(void)
 	// use shader program object
 	glUseProgram(shaderProgramObject);
 
-	// PYRAMID
+	// CUBE
 	// Transformations
 	mat4 modelViewMatrix = mat4::identity(); // this is similar to glLoadIdentity() in display for model view matrix
 	mat4 translationMatrix = mat4::identity();
-	translationMatrix = vmath::translate(-1.5f, 0.0f, -6.0f); //translate triangle backwards
-	mat4 rotationMatrix = mat4::identity();
-	rotationMatrix = vmath::rotate(anglePyramid, 0.0f, 1.0f, 0.0f);
-	modelViewMatrix = translationMatrix * rotationMatrix;
-	mat4 modelViewProjectionMatrix = mat4::identity();
-	modelViewProjectionMatrix = perspectiveProjectionMatrix * modelViewMatrix; // order is important in matrix multiplication
-
-	// send above matrix to the shader in "uniform"
-	glUniformMatrix4fv(mvpMatrixUniform, 1, GL_FALSE, modelViewProjectionMatrix);
-
-	// For Texture
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture_stone);
-	glUniform1i(textureSamplerUniform, 0);
-
-	// Bind with VAO
-	glBindVertexArray(vao_pyramid);
-
-	// Draw the vertex arrays
-	glDrawArrays(GL_TRIANGLES, 0, 12);
-
-	// Unbind with VAO
-	glBindVertexArray(0);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	// CUBE
-	// Transformations
-	modelViewMatrix = mat4::identity(); // this is similar to glLoadIdentity() in display for model view matrix
-	translationMatrix = mat4::identity();
-	translationMatrix = vmath::translate(1.5f, 0.0f, -6.0f); //translate triangle backwards
+	translationMatrix = vmath::translate(0.0f, 0.0f, -6.0f); //translate
 	mat4 scaleMatrix = mat4::identity();
 	scaleMatrix = vmath::scale(0.75f, 0.75f, 0.75f);
 	mat4 rotationMatrixX = mat4::identity();
@@ -842,9 +733,9 @@ void display(void)
 	rotationMatrixY = vmath::rotate(angleCube, 0.0f, 1.0f, 0.0f);
 	mat4 rotationMatrixZ = mat4::identity();
 	rotationMatrixZ = vmath::rotate(angleCube, 0.0f, 0.0f, 1.0f);
-	rotationMatrix = rotationMatrixX * rotationMatrixY * rotationMatrixZ;
+	mat4 rotationMatrix = rotationMatrixX * rotationMatrixY * rotationMatrixZ;
 	modelViewMatrix = translationMatrix * scaleMatrix * rotationMatrix;
-	modelViewProjectionMatrix = mat4::identity();
+	mat4 modelViewProjectionMatrix = mat4::identity();
 	modelViewProjectionMatrix = perspectiveProjectionMatrix * modelViewMatrix; // order is important in matrix multiplication
 
 	// send above matrix to the shader in "uniform"
@@ -879,12 +770,6 @@ void display(void)
 void update(void)
 {
 	// code
-	anglePyramid = anglePyramid + 0.1f;
-	if(anglePyramid >= 360.0f)
-	{
-		anglePyramid = anglePyramid - 360.0f;
-	}
-
 	angleCube = angleCube - 0.1f;
 	if(angleCube <= 0.0f)
 	{
@@ -923,27 +808,6 @@ void uninitialize(void) {
 	{
 		glDeleteVertexArrays(1, &vao_cube);
 		vao_cube = 0;
-	}
-
-	// Free vbo_texcoord_pyramid
-	if (vbo_texcoord_pyramid)
-	{
-		glDeleteBuffers(1, &vbo_texcoord_pyramid);
-		vbo_position_pyramid = 0;
-	}
-
-	// Free vbo_position_pyramid
-	if (vbo_position_pyramid)
-	{
-		glDeleteBuffers(1, &vbo_position_pyramid);
-		vbo_position_pyramid = 0;
-	}
-	
-	// Free vao_pyramid
-	if (vao_pyramid)
-	{
-		glDeleteVertexArrays(1, &vao_pyramid);
-		vao_pyramid = 0;
 	}
 
 	// Detach, delete shader objects and delete shader program object

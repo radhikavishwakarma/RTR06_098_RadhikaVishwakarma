@@ -55,11 +55,8 @@ enum{
 };
 
 GLuint vao_pyramid = 0;
-GLuint vao_cube = 0;
 GLuint vbo_position_pyramid;
-GLuint vbo_position_cube;
 GLuint vbo_texcoord_pyramid = 0;
-GLuint vbo_texcoord_cube = 0;
 
 GLuint mvpMatrixUniform = 0;
 
@@ -67,11 +64,9 @@ mat4 perspectiveProjectionMatrix;
 
 // Rotation angles
 float anglePyramid = 0.0f;
-float angleCube = 0.0f;
 
 // taxture related global variables
 GLuint texture_stone;
-GLuint texture_kundali;
 GLuint textureSamplerUniform;
 
 // Entry Point Function
@@ -559,82 +554,6 @@ int initialize(void)
 		0.0, 0.0, // left-right
 	};
 
-	const GLfloat cube_position[] = {
-		// front
-		1.0f,  1.0f,  1.0f, // top-right of front
-		-1.0f,  1.0f,  1.0f, // top-left of front
-		-1.0f, -1.0f,  1.0f, // bottom-left of front
-		1.0f, -1.0f,  1.0f, // bottom-right of front
-
-		// right
-		1.0f,  1.0f, -1.0f, // top-right of right
-		1.0f,  1.0f,  1.0f, // top-left of right
-		1.0f, -1.0f,  1.0f, // bottom-left of right
-		1.0f, -1.0f, -1.0f, // bottom-right of right
-
-		// back
-		1.0f,  1.0f, -1.0f, // top-right of back
-		-1.0f,  1.0f, -1.0f, // top-left of back
-		-1.0f, -1.0f, -1.0f, // bottom-left of back
-		1.0f, -1.0f, -1.0f, // bottom-right of back
-
-		// left
-		-1.0f,  1.0f,  1.0f, // top-right of left
-		-1.0f,  1.0f, -1.0f, // top-left of left
-		-1.0f, -1.0f, -1.0f, // bottom-left of left
-		-1.0f, -1.0f,  1.0f, // bottom-right of left
-
-		// top
-		1.0f,  1.0f, -1.0f, // top-right of top
-		-1.0f,  1.0f, -1.0f, // top-left of top
-		-1.0f,  1.0f,  1.0f, // bottom-left of top
-		1.0f,  1.0f,  1.0f, // bottom-right of top
-
-		// bottom
-		1.0f, -1.0f,  1.0f, // top-right of bottom
-		-1.0f, -1.0f,  1.0f, // top-left of bottom
-		-1.0f, -1.0f, -1.0f, // bottom-left of bottom
-		1.0f, -1.0f, -1.0f, // bottom-right of bottom
-	};
-
-	const GLfloat cube_texCoords[] = {
-		// front
-		1.0f, 1.0f, // top-right of front
-		0.0f, 1.0f, // top-left of front
-		0.0f, 0.0f, // bottom-left of front
-		1.0f, 0.0f, // bottom-right of front
-
-		// right
-		1.0f, 1.0f, // top-right of right
-		0.0f, 1.0f, // top-left of right
-		0.0f, 0.0f, // bottom-left of right
-		1.0f, 0.0f, // bottom-right of right
-
-		// back
-		1.0f, 1.0f, // top-right of back
-		0.0f, 1.0f, // top-left of back
-		0.0f, 0.0f, // bottom-left of back
-		1.0f, 0.0f, // bottom-right of back
-
-		// left
-		1.0f, 1.0f, // top-right of left
-		0.0f, 1.0f, // top-left of left
-		0.0f, 0.0f, // bottom-left of left
-		1.0f, 0.0f, // bottom-right of left
-
-		// top
-		1.0f, 1.0f, // top-right of top
-		0.0f, 1.0f, // top-left of top
-		0.0f, 0.0f, // bottom-left of top
-		1.0f, 0.0f, // bottom-right of top
-
-		// bottom
-		1.0f, 1.0f, // top-right of bottom
-		0.0f, 1.0f, // top-left of bottom
-		0.0f, 0.0f, // bottom-left of bottom
-		1.0f, 0.0f, // bottom-right of bottom
-	};
-
 	// PYRAMID
 	// VERTEX ARRAY OBJECT FOR ARRAYS OF VERTEX OBJECT
 	glGenVertexArrays(1, &vao_pyramid);
@@ -659,30 +578,6 @@ int initialize(void)
 	// unbind VAO
 	glBindVertexArray(0);
 
-	// CUBE
-	// VERTEX ARRAY OBJECT FOR ARRAYS OF VERTEX OBJECT
-	glGenVertexArrays(1, &vao_cube);
-	// Bind vertex array object
-	glBindVertexArray(vao_cube);
-	// POSITION
-	glGenBuffers(1, &vbo_position_cube);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_position_cube);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(cube_position), cube_position, GL_STATIC_DRAW);
-	glVertexAttribPointer(AMC_ATTRIBUTE_POSITION, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(AMC_ATTRIBUTE_POSITION);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	// COLOR
-	glGenBuffers(1, &vbo_texcoord_cube);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_texcoord_cube);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(cube_texCoords), cube_texCoords, GL_STATIC_DRAW);
-	glVertexAttribPointer(AMC_ATTRIBUTE_TEXCOORD, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-	glEnableVertexAttribArray(AMC_ATTRIBUTE_TEXCOORD);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	// unbind VAO
-	glBindVertexArray(0);
-
 	// Depth related code
 	glClearDepth(1.0f);
 	glEnable(GL_DEPTH_TEST);
@@ -697,13 +592,6 @@ int initialize(void)
 	{
 		fprintf(gpFile,"loadGLTexture stone texture failed \n");
 		return (-6);
-	}
-
-	// load textures
-	if (loadGLTexture (& texture_kundali, MAKEINTRESOURCE (IDBITMAP_KUNDALI)) == FALSE)
-	{
-		fprintf(gpFile, "loadGLTexture kundali texture failed \n");
-		return (-7);
 	}
 
 	perspectiveProjectionMatrix = mat4::identity(); // this is similar to glLoadIdentity() in resize
@@ -804,7 +692,7 @@ void display(void)
 	// Transformations
 	mat4 modelViewMatrix = mat4::identity(); // this is similar to glLoadIdentity() in display for model view matrix
 	mat4 translationMatrix = mat4::identity();
-	translationMatrix = vmath::translate(-1.5f, 0.0f, -6.0f); //translate triangle backwards
+	translationMatrix = vmath::translate(0.0f, 0.0f, -6.0f); //translate triangle backwards
 	mat4 rotationMatrix = mat4::identity();
 	rotationMatrix = vmath::rotate(anglePyramid, 0.0f, 1.0f, 0.0f);
 	modelViewMatrix = translationMatrix * rotationMatrix;
@@ -829,47 +717,6 @@ void display(void)
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	// CUBE
-	// Transformations
-	modelViewMatrix = mat4::identity(); // this is similar to glLoadIdentity() in display for model view matrix
-	translationMatrix = mat4::identity();
-	translationMatrix = vmath::translate(1.5f, 0.0f, -6.0f); //translate triangle backwards
-	mat4 scaleMatrix = mat4::identity();
-	scaleMatrix = vmath::scale(0.75f, 0.75f, 0.75f);
-	mat4 rotationMatrixX = mat4::identity();
-	rotationMatrixX = vmath::rotate(angleCube, 1.0f, 0.0f, 0.0f);
-	mat4 rotationMatrixY = mat4::identity();
-	rotationMatrixY = vmath::rotate(angleCube, 0.0f, 1.0f, 0.0f);
-	mat4 rotationMatrixZ = mat4::identity();
-	rotationMatrixZ = vmath::rotate(angleCube, 0.0f, 0.0f, 1.0f);
-	rotationMatrix = rotationMatrixX * rotationMatrixY * rotationMatrixZ;
-	modelViewMatrix = translationMatrix * scaleMatrix * rotationMatrix;
-	modelViewProjectionMatrix = mat4::identity();
-	modelViewProjectionMatrix = perspectiveProjectionMatrix * modelViewMatrix; // order is important in matrix multiplication
-
-	// send above matrix to the shader in "uniform"
-	glUniformMatrix4fv(mvpMatrixUniform, 1, GL_FALSE, modelViewProjectionMatrix);
-
-	// For Texture
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture_kundali);
-	glUniform1i(textureSamplerUniform, 0);
-
-	// Bind with VAO
-	glBindVertexArray(vao_cube);
-
-	// Draw the vertex arrays
-	glDrawArrays(GL_TRIANGLE_FAN, 0, 4);
-	glDrawArrays(GL_TRIANGLE_FAN, 4, 4);
-	glDrawArrays(GL_TRIANGLE_FAN, 8, 4);
-	glDrawArrays(GL_TRIANGLE_FAN, 12, 4);
-	glDrawArrays(GL_TRIANGLE_FAN, 16, 4);
-	glDrawArrays(GL_TRIANGLE_FAN, 20, 4);
-
-	// Unbind with VAO
-	glBindVertexArray(0);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
 	// unuse shader program object
 	glUseProgram(0);
 
@@ -884,12 +731,6 @@ void update(void)
 	{
 		anglePyramid = anglePyramid - 360.0f;
 	}
-
-	angleCube = angleCube - 0.1f;
-	if(angleCube <= 0.0f)
-	{
-		angleCube = angleCube + 360.0f;
-	}
 }
 
 void uninitialize(void) {
@@ -902,27 +743,6 @@ void uninitialize(void) {
 	{
 		toggleFullScreen();
 		gbFullScreen = FALSE;
-	}
-
-	// Free vbo_texcoord_cube
-	if (vbo_texcoord_cube)
-	{
-		glDeleteBuffers(1, &vbo_texcoord_cube);
-		vbo_position_cube = 0;
-	}
-
-	// Free vbo_position_cube
-	if (vbo_position_cube)
-	{
-		glDeleteBuffers(1, &vbo_position_cube);
-		vbo_position_cube = 0;
-	}
-	
-	// Free vao_cube
-	if (vao_cube)
-	{
-		glDeleteVertexArrays(1, &vao_cube);
-		vao_cube = 0;
 	}
 
 	// Free vbo_texcoord_pyramid
