@@ -27,6 +27,7 @@ int main(void)
         }
         
     }
+    printf("MiniIndex = %d", minIndex);
 
     
     return 0;

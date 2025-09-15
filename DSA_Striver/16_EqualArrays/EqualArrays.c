@@ -3,7 +3,7 @@
 
 int main(void)
 {
-    int arr1[] = {5, 8, 11, 2}; 
+    int arr1[] = {5, 8, 11}; 
     int arr2[] = {5, 8, 11, 2};
     int arr1_size = sizeof(arr1);
     int arr2_size = sizeof(arr2);
