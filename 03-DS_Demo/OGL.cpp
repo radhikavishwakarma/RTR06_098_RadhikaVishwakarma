@@ -3,6 +3,7 @@
 #include<stdio.h>
 #include<stdlib.h>
 #include<math.h>
+#include <mmsystem.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
@@ -49,6 +50,45 @@ HGLRC ghrc = NULL; // Handle to graphics rendering context
 GLuint texture_sky = 0;
 GLuint texture_scene1 = 0;
 GLuint texture_bird_pink = 0;
+GLuint texture_bird_red = 0;
+GLuint texture_pearl1 = 0;
+GLuint texture_stick = 0;
+GLuint texture_grasses = 0;
+GLuint texture_bird_blue = 0;
+GLuint texture_CreditsRoll = 0;
+GLuint texture_PostCreditsRoll = 0;
+GLuint texture_PreIntroRoll = 0;
+GLuint texture_TechStackRoll = 0;
+GLuint texture_TitleMain = 0;
+
+// Sun Position
+float sunPosY = -5.0f;
+BOOL isSunReached = FALSE;
+float birdPinkPosX = 11.8f;
+float birdPinkPosY = 6.0f;
+float birdRedPosX = -7.5f;
+float birdRedPosY = 6.0f;
+BOOL areBirdsReachedGround = FALSE;
+BOOL areBirdsReachedSky = FALSE;
+float pearl1PosX = 11.8f;
+float pearl1PosY = 6.0f;
+float stickPosX = -7.5f;
+float stickPosY = 6.0f;
+float grassesPosX = 11.8f;
+float grassesPosY = 6.0f;
+float birdBluePosX = -7.5f;
+float birdBluePosY = 6.0f;
+float creditsRollY = -5.0f;
+float postCreditsRollY = -5.0f;
+float preIntroRollY = -5.0f;
+float techStackRollY = -5.0f;
+float titleMainY = -5.0f;
+
+UINT iTimeElapsed = 0;
+UINT_PTR timerId;
+
+//	time to update the update() function
+UINT timeUpdate = 100; //	10 * timeUpdate = 1 sec
 
 // Entry Point Function
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdLine, int iCmdShow)
@@ -219,6 +259,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT iMsg, WPARAM wParam, LPARAM lParam)
 					break;
 			}
 			break;
+		case WM_TIMER:
+			iTimeElapsed++;
+			fprintf(gpFile, "%d seconds\n", iTimeElapsed);
+		break;	
 		case WM_CHAR:
 			switch (wParam)
 			{
@@ -359,6 +403,16 @@ int initialize(void)
 	// Tell OpenGL to choose the color to clear the screen
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
+	// checkout https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-settimer
+	timerId = SetTimer(ghwnd, 1, timeUpdate, (TIMERPROC)NULL);
+
+	if (timerId == 0)
+	{
+		// Handle timer creation error
+		fprintf(gpFile, "SetTimer failed\n");
+		return -1;
+	}
+
 	// Loading transparent texture_scene1
 	stbi_set_flip_vertically_on_load(TRUE);
 	
@@ -380,6 +434,78 @@ int initialize(void)
 		return(-8);
 	}
 
+	if (LoadPNGTexture(&texture_bird_red, "bird_red.png") == FALSE)
+	{
+		fprintf(gpFile, "LoadPNGTexture() for texture_bird_red failed\n");
+		return(-9);
+	}
+
+	if (LoadPNGTexture(&texture_pearl1, "pearl1.png") == FALSE)
+	{
+		fprintf(gpFile, "LoadPNGTexture() for texture_pearl1 failed\n");
+		return(-10);
+	}
+
+	if (LoadPNGTexture(&texture_stick, "stick.png") == FALSE)
+	{
+		fprintf(gpFile, "LoadPNGTexture() for texture_stick failed\n");
+		return(-11);
+	}
+
+	if (LoadPNGTexture(&texture_grasses, "grasses.png") == FALSE)
+	{
+		fprintf(gpFile, "LoadPNGTexture() for texture_stick failed\n");
+		return(-12);
+	}
+
+	if (LoadPNGTexture(&texture_bird_blue, "bird_blue.png") == FALSE)
+	{
+		fprintf(gpFile, "LoadPNGTexture() for texture_bird_blue failed\n");
+		return(-13);
+	}
+
+	if (LoadPNGTexture(&texture_CreditsRoll, "CreditsRoll.png") == FALSE)
+	{
+		fprintf(gpFile, "LoadPNGTexture() for texture_CreditsRoll failed\n");
+		return(-14);
+	}
+
+	if (LoadPNGTexture(&texture_PostCreditsRoll, "PostCreditsRoll.png") == FALSE)
+	{
+		fprintf(gpFile, "LoadPNGTexture() for texture_PostCreditsRoll failed\n");
+		return(-15);
+	}
+
+	if (LoadPNGTexture(&texture_PreIntroRoll, "PreIntroRoll.png") == FALSE)
+	{
+		fprintf(gpFile, "LoadPNGTexture() for texture_PreIntroRoll failed\n");
+		return(-16);
+	}
+
+	if (LoadPNGTexture(&texture_TechStackRoll, "TechStackRoll.png") == FALSE)
+	{
+		fprintf(gpFile, "LoadPNGTexture() for texture_TechStackRoll failed\n");
+		return(-17);
+	}
+
+	if (LoadPNGTexture(&texture_TitleMain, "TitleMain.png") == FALSE)
+	{
+		fprintf(gpFile, "LoadPNGTexture() for texture_TitleMain failed\n");
+		return(-18);
+	}
+
+	FILE *fp = fopen("ChivChivChimni.wav", "rb");
+	int readyPlay = 0;
+    if (fp != NULL)
+    {
+		readyPlay = 1;
+        fclose(fp); // close the file
+    }
+	if (readyPlay == 1)
+	{
+		PlaySound("ChivChivChimni.wav", NULL, SND_ASYNC | SND_FILENAME);
+	}
+    
 	// enabling depth
 	glEnable(GL_TEXTURE_2D);
 	// glEnable(GL_BLEND);
@@ -417,7 +543,7 @@ void resize(int width, int height)
 void display(void)
 {
 	// function declaration
-	// void drawCircle(int, int, int);
+	void drawCircle(float, float, float);
 
     // code
 	// clear OpenGL buffers
@@ -429,6 +555,82 @@ void display(void)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	// ----------------------PreIntro texture here-------------------
+	// Set it to identity matrix
+	glLoadIdentity();
+
+	glPushMatrix();
+	// translate triangle backwards
+	glTranslatef(0.0f, preIntroRollY, -13.0f);
+	glScalef(1.2f, 1.2f, 0.0f);
+
+	// glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture_PreIntroRoll);
+	
+	// Draw quad here
+	glBegin(GL_QUADS);
+	// Front face
+	// Top Right
+	glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(2.5f, 1.5f, 0.0f);
+
+	// Top Left
+	glTexCoord2f(0.0f, 1.0f);
+    glVertex3f(-2.5f, 1.5f, 0.0f);
+
+	// Bottom Left
+	glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(-2.5f, -1.5f, 0.0f);
+
+	// Bottom Right
+	glTexCoord2f(1.0f, 0.0f);
+    glVertex3f(2.5f, -1.5f, 0.0f);
+
+    glEnd();
+
+	// Unbind texture
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glPopMatrix();
+
+	// ----------------------PreIntro texture here-------------------
+	// Set it to identity matrix
+	glLoadIdentity();
+
+	glPushMatrix();
+	// translate triangle backwards
+	glTranslatef(0.0f, preIntroRollY, -13.0f);
+	glScalef(1.2f, 1.2f, 0.0f);
+
+	// glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture_PreIntroRoll);
+	
+	// Draw quad here
+	glBegin(GL_QUADS);
+	// Front face
+	// Top Right
+	glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(2.5f, 1.5f, 0.0f);
+
+	// Top Left
+	glTexCoord2f(0.0f, 1.0f);
+    glVertex3f(-2.5f, 1.5f, 0.0f);
+
+	// Bottom Left
+	glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(-2.5f, -1.5f, 0.0f);
+
+	// Bottom Right
+	glTexCoord2f(1.0f, 0.0f);
+    glVertex3f(2.5f, -1.5f, 0.0f);
+
+    glEnd();
+
+	// Unbind texture
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glPopMatrix();
+
 	// ----------------------Sky texture here-------------------
 	// Set it to identity matrix
 	glLoadIdentity();
@@ -436,7 +638,7 @@ void display(void)
 	glPushMatrix();
 	// translate triangle backwards
 	glTranslatef(0.0f, 0.0f, -13.0f);
-	// glScalef(0.2f, 0.2f, 0.0f);
+	glScalef(1.2f, 1.2f, 0.0f);
 
 	// glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture_sky);
@@ -464,6 +666,18 @@ void display(void)
 
 	// Unbind texture
 	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glPopMatrix();
+
+	// ----------------------Draw sun here-------------------
+	// Set it to identity matrix
+	glLoadIdentity();
+
+	glPushMatrix();
+	// translate triangle backwards
+	glTranslatef(3.8f, sunPosY, -13.0f);
+	
+	drawCircle(0.0f, 0.0f, 0.0f);
 
 	glPopMatrix();
 
@@ -504,42 +718,451 @@ void display(void)
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glPopMatrix();
 
-	// Draw sun
-	// glPushMatrix();
-    // glScaled(0.00005, 0.00005, 0.0);
-	// drawCircle(255, 255, 0);
-	// glPopMatrix();
+	// ----------------------Bird_pink texture here-------------------
+	// Set it to identity matrix
+	glLoadIdentity();
+	glPushMatrix();
+
+	// translate pink_bird 
+	glTranslatef(birdPinkPosX, birdPinkPosY, -11.0f);
+	glScalef(-0.65f, 0.65f, 0.0f);
 	
+	// glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, texture_bird_pink);
+
+	// Draw quad here
+	glBegin(GL_QUADS);
+	// Front face
+	// Top Right
+	glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(1.0f, 1.0f, 0.0f);
+
+	// Top Left
+	glTexCoord2f(0.0f, 1.0f);
+    glVertex3f(-1.0f, 1.0f, 0.0f);
+
+	// Bottom Left
+	glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(-1.0f, -1.0f, 0.0f);
+
+	// Bottom Right
+	glTexCoord2f(1.0f, 0.0f);
+    glVertex3f(1.0f, -1.0f, 0.0f);
+
+    glEnd();
+
+	// Unbind texture
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glPopMatrix();
+
+	// ----------------------Bird_red texture here-------------------
+	// Set it to identity matrix
+	glLoadIdentity();
+	glPushMatrix();
+
+	// translate bird_red 
+	glTranslatef(birdRedPosX, birdRedPosY, -11.0f);
+	glScalef(0.55f, 0.55f, 0.0f);
+	
+	// glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, texture_bird_red);
+
+	// Draw quad here
+	glBegin(GL_QUADS);
+	// Front face
+	// Top Right
+	glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(1.0f, 1.0f, 0.0f);
+
+	// Top Left
+	glTexCoord2f(0.0f, 1.0f);
+    glVertex3f(-1.0f, 1.0f, 0.0f);
+
+	// Bottom Left
+	glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(-1.0f, -1.0f, 0.0f);
+
+	// Bottom Right
+	glTexCoord2f(1.0f, 0.0f);
+    glVertex3f(1.0f, -1.0f, 0.0f);
+
+    glEnd();
+
+	// Unbind texture
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glPopMatrix();
+
+	// ----------------------Pearl1 texture here-------------------
+	// Set it to identity matrix
+	glLoadIdentity();
+	glPushMatrix();
+
+	// translate pearl1
+	glTranslatef(pearl1PosX, pearl1PosY, -11.0f);
+	glScalef(0.07f, 0.07f, 0.0f);
+	
+	// glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, texture_pearl1);
+
+	// Draw quad here
+	glBegin(GL_QUADS);
+	// Front face
+	// Top Right
+	glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(1.0f, 1.0f, 0.0f);
+
+	// Top Left
+	glTexCoord2f(0.0f, 1.0f);
+    glVertex3f(-1.0f, 1.0f, 0.0f);
+
+	// Bottom Left
+	glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(-1.0f, -1.0f, 0.0f);
+
+	// Bottom Right
+	glTexCoord2f(1.0f, 0.0f);
+    glVertex3f(1.0f, -1.0f, 0.0f);
+
+    glEnd();
+
+	// Unbind texture
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glPopMatrix();
+
+	// ----------------------stick texture here-------------------
+	// Set it to identity matrix
+	glLoadIdentity();
+	glPushMatrix();
+
+	// translate stick
+	glTranslatef(stickPosX, stickPosY, -11.0f);
+	glScalef(0.30f, 0.30f, 0.0f);
+	
+	// glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, texture_stick);
+
+	// Draw quad here
+	glBegin(GL_QUADS);
+	// Front face
+	// Top Right
+	glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(1.0f, 1.0f, 0.0f);
+
+	// Top Left
+	glTexCoord2f(0.0f, 1.0f);
+    glVertex3f(-1.0f, 1.0f, 0.0f);
+
+	// Bottom Left
+	glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(-1.0f, -1.0f, 0.0f);
+
+	// Bottom Right
+	glTexCoord2f(1.0f, 0.0f);
+    glVertex3f(1.0f, -1.0f, 0.0f);
+
+    glEnd();
+
+	// Unbind texture
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glPopMatrix();
+
+	// ----------------------Grasses texture here-------------------
+	// Set it to identity matrix
+	glLoadIdentity();
+	glPushMatrix();
+
+	// translate pearl1
+	glTranslatef(grassesPosX, grassesPosY, -11.0f);
+	glScalef(0.35f, 0.35f, 0.0f);
+	
+	// glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, texture_grasses);
+
+	// Draw quad here
+	glBegin(GL_QUADS);
+	// Front face
+	// Top Right
+	glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(1.0f, 1.0f, 0.0f);
+
+	// Top Left
+	glTexCoord2f(0.0f, 1.0f);
+    glVertex3f(-1.0f, 1.0f, 0.0f);
+
+	// Bottom Left
+	glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(-1.0f, -1.0f, 0.0f);
+
+	// Bottom Right
+	glTexCoord2f(1.0f, 0.0f);
+    glVertex3f(1.0f, -1.0f, 0.0f);
+
+    glEnd();
+
+	// Unbind texture
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glPopMatrix();
+
+	// ----------------------Bird_blue texture here-------------------
+	// Set it to identity matrix
+	glLoadIdentity();
+	glPushMatrix();
+
+	// translate bird_red 
+	glTranslatef(birdBluePosX, birdBluePosY, -11.0f);
+	glScalef(0.22f, 0.22f, 0.0f);
+	
+	// glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, texture_bird_blue);
+
+	// Draw quad here
+	glBegin(GL_QUADS);
+	// Front face
+	// Top Right
+	glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(1.0f, 1.0f, 0.0f);
+
+	// Top Left
+	glTexCoord2f(0.0f, 1.0f);
+    glVertex3f(-1.0f, 1.0f, 0.0f);
+
+	// Bottom Left
+	glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(-1.0f, -1.0f, 0.0f);
+
+	// Bottom Right
+	glTexCoord2f(1.0f, 0.0f);
+    glVertex3f(1.0f, -1.0f, 0.0f);
+
+    glEnd();
+
+	// Unbind texture
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glPopMatrix();
+
 	SwapBuffers(ghdc);
 }
 
-void drawCircle(int r, int g, int b)
+void drawCircle(float x, float y, float z)
 {
     // local variables declaration
-    double x, y;
     double radius = 1.0f;
     double radian_angle;
 	const double PI = 3.1459;
  
-    //set the foreground color
-	glColor3ub (r, g, b);
-
     glBegin(GL_POLYGON);
     for (double angle = 0.0; angle <= 360.0; angle += 2.0)
     {
         radian_angle = angle * PI/180;
         x = radius * cos(radian_angle);
         y = radius * sin(radian_angle);
-        glVertex2d(x, y);
+		//set the foreground color
+		glColor3f(1.0f, 1.0f, 0.0f);
+        glVertex2f(x, y);
     }
      
-    glEnd();
+	glEnd();
+	glColor3f(1.0f, 1.0f, 1.0f);
+	
 }
 
 void update(void)
 {
 	// code
-}
+	if (iTimeElapsed > 0 && iTimeElapsed < 70)
+	{
+		// Sun animated here
+		sunPosY = sunPosY + 0.01f;
+		if (sunPosY >= 3.8f)
+		{
+			sunPosY = 3.8f;
+			isSunReached = TRUE;
+		}
+	}
+
+	if (iTimeElapsed > 70 && iTimeElapsed < 150)
+	{
+		if (isSunReached == TRUE)
+		{
+			birdPinkPosX = birdPinkPosX - 0.01f;
+			birdPinkPosY = birdPinkPosY - 0.01f;
+			if (birdPinkPosX <= 2.8f || birdPinkPosY <= -3.0f)
+			{
+				birdPinkPosX = 2.8f;
+				birdPinkPosY = -3.0f;
+				areBirdsReachedGround = TRUE;
+			}
+		}
+	}
+
+	if (iTimeElapsed > 70 && iTimeElapsed < 150)
+	{
+		if (isSunReached == TRUE)
+		{
+			birdRedPosX = birdRedPosX + 0.01f;
+			birdRedPosY = birdRedPosY - 0.01f;
+			if (birdRedPosX >= 1.5f || birdRedPosY <= -3.0f)
+			{
+				birdRedPosX = 1.5f;
+				birdRedPosY = -3.0f;
+				areBirdsReachedGround = TRUE;
+			}
+		}
+	}
+
+	if (iTimeElapsed > 150 && iTimeElapsed < 220)
+	{
+		if (areBirdsReachedGround == TRUE)
+		{
+			birdPinkPosX = birdPinkPosX + 0.01f;
+			birdPinkPosY = birdPinkPosY + 0.01f;
+			if (birdPinkPosX >= 11.8f || birdPinkPosY >= 6.0f)
+			{
+				birdPinkPosX = 11.8f;
+				birdPinkPosY = 6.0f;
+				areBirdsReachedGround = FALSE;
+				areBirdsReachedSky = TRUE;
+			}
+		}
+	}
+
+	if (iTimeElapsed > 150 && iTimeElapsed < 220)
+	{
+		if (areBirdsReachedGround == TRUE)
+		{
+			birdRedPosX = birdRedPosX - 0.01f;
+			birdRedPosY = birdRedPosY + 0.01f;
+			if (birdRedPosX >= 7.5f || birdRedPosY >= 6.0f)
+			{
+				birdRedPosX = -7.5f;
+				birdRedPosY = 6.0f;
+				areBirdsReachedGround = FALSE;
+				areBirdsReachedSky = TRUE;
+			}
+		}
+	}
+
+	if (iTimeElapsed > 220 && iTimeElapsed < 350)
+	{
+		if (isSunReached == TRUE)
+		{
+			birdPinkPosX = birdPinkPosX - 0.01f;
+			birdPinkPosY = birdPinkPosY - 0.01f;
+			if (birdPinkPosX <= 2.8f || birdPinkPosY <= -3.0f)
+			{
+				birdPinkPosX = 2.8f;
+				birdPinkPosY = -3.0f;
+			}
+		}
+	}
+
+	if (iTimeElapsed > 220 && iTimeElapsed < 350)
+	{
+		pearl1PosX = pearl1PosX - 0.01f;
+		pearl1PosY = pearl1PosY - 0.01f;
+		if (pearl1PosX <= 2.8f || pearl1PosY <= -3.5f)
+		{
+			pearl1PosX = 2.8f;
+			pearl1PosY = -3.5f;	
+		}
+	}
+
+	if (iTimeElapsed > 220 && iTimeElapsed < 350)
+	{
+		if (isSunReached == TRUE)
+		{
+			birdRedPosX = birdRedPosX + 0.01f;
+			birdRedPosY = birdRedPosY - 0.01f;
+			if (birdRedPosX >= 1.5f || birdRedPosY <= -3.0f)
+			{
+				birdRedPosX = 1.5f;
+				birdRedPosY = -3.0f;
+			}
+		}
+	}
+
+	if (iTimeElapsed > 350 && iTimeElapsed < 600)
+	{
+		birdPinkPosX = birdPinkPosX + 0.01f;
+		birdPinkPosY = birdPinkPosY + 0.01f;
+		if (birdPinkPosX >= 11.8f || birdPinkPosY >= 6.0f)
+		{
+			birdPinkPosX = 11.8f;
+			birdPinkPosY = 6.0f;
+			areBirdsReachedGround = FALSE;
+			areBirdsReachedSky = TRUE;
+		}
+	}
+
+	if (iTimeElapsed > 600 && iTimeElapsed < 850)
+	{
+		birdPinkPosX = birdPinkPosX - 0.01f;
+		birdPinkPosY = birdPinkPosY - 0.01f;
+		if (birdPinkPosX <= 3.5f || birdPinkPosY <= -3.0f)
+		{
+			birdPinkPosX = 3.5f;
+			birdPinkPosY = -3.0f;
+		}
+	}
+
+	if (iTimeElapsed > 600 && iTimeElapsed < 850)
+	{
+		grassesPosX = grassesPosX - 0.01f;
+		grassesPosY = grassesPosY - 0.01f;
+		if (grassesPosX <= 3.5f || grassesPosY <= -3.3f)
+		{
+			grassesPosX = 3.5f;
+			grassesPosY = -3.3f;	
+		}
+	}
+
+	if (iTimeElapsed > 350 && iTimeElapsed < 550)
+	{
+		birdRedPosX = birdRedPosX - 0.01f;
+		birdRedPosY = birdRedPosY + 0.01f;
+		if (birdRedPosX >= 7.5f || birdRedPosY >= 6.0f)
+		{
+			birdRedPosX = -7.5f;
+			birdRedPosY = 6.0f;
+			areBirdsReachedGround = FALSE;
+			areBirdsReachedSky = TRUE;
+		}
+	}
+
+	if (iTimeElapsed > 600 && iTimeElapsed < 850)
+	{
+		birdRedPosX = birdRedPosX + 0.01f;
+		birdRedPosY = birdRedPosY - 0.01f;
+		if (birdRedPosX >= 1.5f || birdRedPosY <= -3.0f)
+		{
+			birdRedPosX = 1.5f;
+			birdRedPosY = -3.0f;
+		}
+	}
+
+	 // stick animated here
+	if (iTimeElapsed > 600 && iTimeElapsed < 850)
+	{
+		stickPosX = stickPosX + 0.01f;
+		stickPosY = stickPosY - 0.01f;
+		if (stickPosX >= 1.5f || stickPosY <= -3.0f)
+		{
+			stickPosX = 2.0f;
+			stickPosY = -3.5f;	
+		}
+	}
+
+	if (iTimeElapsed > 850 && iTimeElapsed < 1500)
+	{
+		birdBluePosX = birdBluePosX + 0.01f;
+		birdBluePosY = birdBluePosY - 0.01f;
+		if (birdBluePosX >= -4.4f || birdBluePosY <= -1.3f)
+		{
+			birdBluePosX = -4.4f;
+			birdBluePosY = -1.3f;
+		}
+	}
+}	
 
 void uninitialize(void) {
 	// function declarations
@@ -603,46 +1226,40 @@ void uninitialize(void) {
 
 BOOL LoadPNGTexture(GLuint *texture, char *file)
 {
-	// variable declaration
-	int w, h;
-	int channels_in_file;
+	// Variable declarations
+	int width, height, numberOfChannels;
+	unsigned char * image;
 	BOOL bResult = FALSE;
 
-	// Load the image using the stbi library
-	unsigned char *image = stbi_load(file, &w, &h, &channels_in_file, STBI_rgb_alpha);
-
 	// code
-	if (image)
+	image = stbi_load(file, &width, &height, &numberOfChannels, STBI_rgb_alpha);
+	if(image)
 	{
 		bResult = TRUE;
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 		glGenTextures(1, texture);
-		glBindTexture(GL_TEXTURE_1D, *texture);
+		glBindTexture(GL_TEXTURE_2D, *texture);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
-		// create texture
-		if (channels_in_file == 3)
-		{
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-			fprintf(gpFile, "Loading a non transparent image !!!\n");
-		}
-		else if (channels_in_file == 4)
-		{
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-			fprintf(gpFile, "Loading a transparent image !!!\n");
-		}
 		
-		// unbind
-		glBindTexture(GL_TEXTURE_2D, 0);
+		if(numberOfChannels == 3)
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+		}
+		if(numberOfChannels == 4)
+		{
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
 
-		// free the image
-		stbi_image_free(image);	
+		}
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+		stbi_image_free(image);
+		
 	}
 	else
 	{
-		fprintf(gpFile, "\n %s - %s", file, stbi_failure_reason());
+		fprintf(gpFile, "stbi_load failed!! %s - %s\n", file, stbi_failure_reason());
+		return (-7);
 	}
-
-	return bResult;
+	return (bResult);
 }
