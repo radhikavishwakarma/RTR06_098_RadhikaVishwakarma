@@ -68,7 +68,6 @@ float skyPosY = -5.0f;
 float skySpeed = 0.001f;
 float ScenePosY = -12.7f;
 float SceneSpeed = 0.001f;
-BOOL isSunReached = FALSE;
 float birdPinkPosX = 11.8f;
 float birdPinkPosY = 6.0f;
 float birdPinkSpeed = 0.001f;
@@ -1029,7 +1028,6 @@ void update(void)
 		if (sunPosY >= 3.8f)
 		{
 			sunPosY = 3.8f;
-			isSunReached = TRUE;
 		}
 
 		// Scene animated here
@@ -1040,102 +1038,55 @@ void update(void)
 		}
 	}
 
-	if (iTimeElapsed > 150 && iTimeElapsed < 350)
+	if (iTimeElapsed > 120 && iTimeElapsed < 220)
 	{
-		if (isSunReached == TRUE)
+		birdPinkPosX = birdPinkPosX - birdPinkSpeed;
+		birdPinkPosY = birdPinkPosY - birdPinkSpeed;
+		if (birdPinkPosX <= 2.8f || birdPinkPosY <= -3.0f)
 		{
-			birdPinkPosX = birdPinkPosX - birdPinkSpeed;
-			birdPinkPosY = birdPinkPosY - birdPinkSpeed;
-			if (birdPinkPosX <= 2.8f || birdPinkPosY <= -3.0f)
-			{
-				birdPinkPosX = 2.8f;
-				birdPinkPosY = -3.0f;
-				areBirdsReachedGround = TRUE;
-			}
+			birdPinkPosX = 2.8f;
+			birdPinkPosY = -3.0f;
+			areBirdsReachedGround = TRUE;
+		}
+		pearl1PosX = pearl1PosX - pearl1Speed;
+		pearl1PosY = pearl1PosY - pearl1Speed;
+		if (pearl1PosX <= 2.8f || pearl1PosY <= -3.5f)
+		{
+			pearl1PosX = 2.8f;
+			pearl1PosY = -3.5f;	
 		}
 	}
 
-	if (iTimeElapsed > 150 && iTimeElapsed < 350)
+	if (iTimeElapsed > 120 && iTimeElapsed < 220)
 	{
-		if (isSunReached == TRUE)
+		birdRedPosX = birdRedPosX + birdRedSpeed;
+		birdRedPosY = birdRedPosY - birdRedSpeed;
+		if (birdRedPosX >= 1.5f || birdRedPosY <= -3.0f)
 		{
-			birdRedPosX = birdRedPosX + birdRedSpeed;
-			birdRedPosY = birdRedPosY - birdRedSpeed;
-			if (birdRedPosX >= 1.5f || birdRedPosY <= -3.0f)
-			{
-				birdRedPosX = 1.5f;
-				birdRedPosY = -3.0f;
-				areBirdsReachedGround = TRUE;
-			}
-
-			pearl1PosX = pearl1PosX - pearl1Speed;
-			pearl1PosY = pearl1PosY - pearl1Speed;
-			if (pearl1PosX <= 2.8f || pearl1PosY <= -3.5f)
-			{
-				pearl1PosX = 2.8f;
-				pearl1PosY = -3.5f;	
-			}
+			birdRedPosX = 1.5f;
+			birdRedPosY = -3.0f;
+			areBirdsReachedGround = TRUE;
 		}
 	}
 
+	if (iTimeElapsed > 210 && iTimeElapsed < 450)
+	{
+		birdPinkPosX = birdPinkPosX + birdPinkSpeed;
+		birdPinkPosY = birdPinkPosY + birdPinkSpeed;
+		if (birdPinkPosX >= 11.8f || birdPinkPosY >= 6.0f)
+		{
+			birdPinkPosX = 11.8f;
+			birdPinkPosY = 6.0f;
+		}
 
-	// if (iTimeElapsed > 420 && iTimeElapsed < 600)
-	// {
-	// 	if (isSunReached == TRUE)
-	// 	{
-	// 		birdPinkPosX = birdPinkPosX - 0.01f;
-	// 		birdPinkPosY = birdPinkPosY - 0.01f;
-	// 		if (birdPinkPosX <= 2.8f || birdPinkPosY <= -3.0f)
-	// 		{
-	// 			birdPinkPosX = 2.8f;
-	// 			birdPinkPosY = -3.0f;
-	// 		}
-	// 	}
-	// 	pearl1PosX = pearl1PosX - 0.01f;
-	// 	pearl1PosY = pearl1PosY - 0.01f;
-	// 	if (pearl1PosX <= 2.8f || pearl1PosY <= -3.5f)
-	// 	{
-	// 		pearl1PosX = 2.8f;
-	// 		pearl1PosY = -3.5f;	
-	// 	}
-	// }
-
-	// if (iTimeElapsed > 420 && iTimeElapsed < 600)
-	// {
-	// 	if (isSunReached == TRUE)
-	// 	{
-	// 		birdRedPosX = birdRedPosX + 0.01f;
-	// 		birdRedPosY = birdRedPosY - 0.01f;
-	// 		if (birdRedPosX >= 1.5f || birdRedPosY <= -3.0f)
-	// 		{
-	// 			birdRedPosX = 1.5f;
-	// 			birdRedPosY = -3.0f;
-	// 		}
-	// 	}
-	// }
-
-	// if (iTimeElapsed > 600 && iTimeElapsed < 720)
-	// {
-	// 	birdPinkPosX = birdPinkPosX + 0.01f;
-	// 	birdPinkPosY = birdPinkPosY + 0.01f;
-	// 	if (birdPinkPosX >= 11.8f || birdPinkPosY >= 6.0f)
-	// 	{
-	// 		birdPinkPosX = 11.8f;
-	// 		birdPinkPosY = 6.0f;
-	// 		areBirdsReachedGround = FALSE;
-	// 		areBirdsReachedSky = TRUE;
-	// 	}
-
-	// 	birdRedPosX = birdRedPosX - 0.01f;
-	// 	birdRedPosY = birdRedPosY + 0.01f;
-	// 	if (birdRedPosX >= 7.5f || birdRedPosY >= 6.0f)
-	// 	{
-	// 		birdRedPosX = -7.5f;
-	// 		birdRedPosY = 6.0f;
-	// 		areBirdsReachedGround = FALSE;
-	// 		areBirdsReachedSky = TRUE;
-	// 	}
-	// }
+		birdRedPosX = birdRedPosX - birdRedSpeed;
+		birdRedPosY = birdRedPosY + birdRedSpeed;
+		if (birdRedPosX >= 7.5f || birdRedPosY >= 6.0f)
+		{
+			birdRedPosX = -7.5f;
+			birdRedPosY = 6.0f;
+		}
+	}
 
 	// if (iTimeElapsed > 720 && iTimeElapsed < 900)
 	// {
