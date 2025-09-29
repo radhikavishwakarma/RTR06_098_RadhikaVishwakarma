@@ -62,29 +62,43 @@ GLuint texture_TechStackRoll = 0;
 GLuint texture_TitleMain = 0;
 
 // Sun Position
-float sunPosY = -7.0f;
-float skyPosY = -5.5f;
-float ScenePosY = -9.5f;
+float sunPosY = -12.0f;
+float sunSpeed = 0.001f;
+float skyPosY = -5.0f;
+float skySpeed = 0.001f;
+float ScenePosY = -12.7f;
+float SceneSpeed = 0.001f;
 BOOL isSunReached = FALSE;
 float birdPinkPosX = 11.8f;
 float birdPinkPosY = 6.0f;
+float birdPinkSpeed = 0.001f;
 float birdRedPosX = -7.5f;
 float birdRedPosY = 6.0f;
+float birdRedSpeed = 0.001f;
 BOOL areBirdsReachedGround = FALSE;
 BOOL areBirdsReachedSky = FALSE;
 float pearl1PosX = 11.8f;
 float pearl1PosY = 6.0f;
+float pearl1Speed = 0.001f;
 float stickPosX = -7.5f;
 float stickPosY = 6.0f;
+float stickSpeed = 0.001f;
 float grassesPosX = 11.8f;
 float grassesPosY = 6.0f;
+float grassesSpeed = 0.001f;
 float birdBluePosX = -7.5f;
 float birdBluePosY = 6.0f;
+float birdBlueSpeed = 0.001f;
 float creditsRollY = -5.0f;
+float creditsRollSpeed = 0.001f;
 float postCreditsRollY = -5.0f;
-float preIntroRollY = -5.0f;
+float postCreditsRollSpeed = 0.001f;
+float preIntroRollY = -8.0f;
+float preIntroRollSpeed = 0.001f;
 float techStackRollY = -5.0f;
+float techStackRollSpeed = 0.001f;
 float titleMainY = -8.0f;
+float titleMainSpeed = 0.001f;
 
 UINT iTimeElapsed = 0;
 UINT_PTR timerId;
@@ -562,75 +576,77 @@ void display(void)
 	glLoadIdentity();
 
 	glPushMatrix();
-	// translate triangle backwards
-	glTranslatef(0.0f, skyPosY, -13.0f);
-	glScalef(1.2f, 1.2f, 0.0f);
+	{
 
-	// glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture_sky);
+		glTranslatef(0.0f, skyPosY, -13.0f);
+		glScalef(1.2f, 1.2f, 0.0f);
 	
-	// Draw quad here
-	glBegin(GL_QUADS);
-	// Front face
-	// Top Right
-	glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(8.0f, 9.0f, 0.0f);
-
-	// Top Left
-	glTexCoord2f(0.0f, 1.0f);
-    glVertex3f(-8.0f, 9.0f, 0.0f);
-
-	// Bottom Left
-	glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(-8.0f, -9.0f, 0.0f);
-
-	// Bottom Right
-	glTexCoord2f(1.0f, 0.0f);
-    glVertex3f(8.0f, -9.0f, 0.0f);
-
-    glEnd();
-
-	// Unbind texture
-	glBindTexture(GL_TEXTURE_2D, 0);
-
+		// glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture_sky);
+		
+		// Draw quad here
+		glBegin(GL_QUADS);
+		// Front face
+		// Top Right
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex3f(8.0f, 9.0f, 0.0f);
+	
+		// Top Left
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex3f(-8.0f, 9.0f, 0.0f);
+	
+		// Bottom Left
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(-8.0f, -9.0f, 0.0f);
+	
+		// Bottom Right
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex3f(8.0f, -9.0f, 0.0f);
+	
+		glEnd();
+	
+		// Unbind texture
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 	glPopMatrix();
 
-	// ----------------------PreIntro texture here-------------------
+	// ---------------------- PreIntro texture here -------------------
 	// Set it to identity matrix
 	glLoadIdentity();
 
 	glPushMatrix();
-	// translate triangle backwards
-	glTranslatef(0.0f, preIntroRollY, -13.0f);
-	glScalef(1.2f, 1.2f, 0.0f);
+	{
 
-	// glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture_PreIntroRoll);
+		glTranslatef(0.0f, preIntroRollY, -13.0f);
+		glScalef(1.2f, 1.2f, 0.0f);
 	
-	// Draw quad here
-	glBegin(GL_QUADS);
-	// Front face
-	// Top Right
-	glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(2.5f, 1.5f, 0.0f);
-
-	// Top Left
-	glTexCoord2f(0.0f, 1.0f);
-    glVertex3f(-2.5f, 1.5f, 0.0f);
-
-	// Bottom Left
-	glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(-2.5f, -1.5f, 0.0f);
-
-	// Bottom Right
-	glTexCoord2f(1.0f, 0.0f);
-    glVertex3f(2.5f, -1.5f, 0.0f);
-
-    glEnd();
-
-	// Unbind texture
-	glBindTexture(GL_TEXTURE_2D, 0);
-
+		// glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture_PreIntroRoll);
+		
+		// Draw quad here
+		glBegin(GL_QUADS);
+		// Front face
+		// Top Right
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex3f(2.5f, 1.5f, 0.0f);
+	
+		// Top Left
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex3f(-2.5f, 1.5f, 0.0f);
+	
+		// Bottom Left
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(-2.5f, -1.5f, 0.0f);
+	
+		// Bottom Right
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex3f(2.5f, -1.5f, 0.0f);
+	
+		glEnd();
+	
+		// Unbind texture
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 	glPopMatrix();
 
 	// ----------------------Title Main texture here-------------------
@@ -638,37 +654,38 @@ void display(void)
 	glLoadIdentity();
 
 	glPushMatrix();
-	// translate triangle backwards
-	glTranslatef(0.0f, titleMainY, -13.0f);
-	glScalef(1.2f, 1.2f, 0.0f);
+	{
 
-	// glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture_TitleMain);
+		glTranslatef(0.0f, titleMainY, -13.0f);
+		glScalef(1.2f, 1.2f, 0.0f);
 	
-	// Draw quad here
-	glBegin(GL_QUADS);
-	// Front face
-	// Top Right
-	glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(4.5f, 1.0f, 0.0f);
-
-	// Top Left
-	glTexCoord2f(0.0f, 1.0f);
-    glVertex3f(-4.5f, 1.0f, 0.0f);
-
-	// Bottom Left
-	glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(-4.5f, -1.0f, 0.0f);
-
-	// Bottom Right
-	glTexCoord2f(1.0f, 0.0f);
-    glVertex3f(4.5f, -1.0f, 0.0f);
-
-    glEnd();
-
-	// Unbind texture
-	glBindTexture(GL_TEXTURE_2D, 0);
-
+		// glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture_TitleMain);
+		
+		// Draw quad here
+		glBegin(GL_QUADS);
+		// Front face
+		// Top Right
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex3f(4.5f, 0.5f, 0.0f);
+	
+		// Top Left
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex3f(-4.5f, 0.5f, 0.0f);
+	
+		// Bottom Left
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(-4.5f, -0.5f, 0.0f);
+	
+		// Bottom Right
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex3f(4.5f, -0.5f, 0.0f);
+	
+		glEnd();
+	
+		// Unbind texture
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 	glPopMatrix();
 
 	// ----------------------Draw sun here-------------------
@@ -676,8 +693,8 @@ void display(void)
 	glLoadIdentity();
 
 	glPushMatrix();
-	// translate triangle backwards
 	glTranslatef(3.8f, sunPosY, -13.0f);
+	glScalef(0.75f, 0.75f, 0.75f);
 	
 	drawCircle(0.0f, 0.0f, 0.0f);
 
@@ -687,260 +704,267 @@ void display(void)
 	// Set it to identity matrix
 	glLoadIdentity();
 	glPushMatrix();
+	{
 
-	// translate triangle backwards
-	glTranslatef(0.0f, ScenePosY, -11.0f);
-	// glScalef(0.2f, 0.2f, 0.0f);
+		glTranslatef(0.0f, ScenePosY, -11.0f);
+		// glScalef(0.2f, 0.2f, 0.0f);
+		
+		// glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, texture_scene1);
 	
-	// glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, texture_scene1);
-
-	// Draw quad here
-	glBegin(GL_QUADS);
-	// Front face
-	// Top Right
-	glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(8.0f, 4.5f, 0.0f);
-
-	// Top Left
-	glTexCoord2f(0.0f, 1.0f);
-    glVertex3f(-8.0f, 4.5f, 0.0f);
-
-	// Bottom Left
-	glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(-8.0f, -4.5f, 0.0f);
-
-	// Bottom Right
-	glTexCoord2f(1.0f, 0.0f);
-    glVertex3f(8.0f, -4.5f, 0.0f);
-
-    glEnd();
-
-	// Unbind texture
-	glBindTexture(GL_TEXTURE_2D, 0);
+		// Draw quad here
+		glBegin(GL_QUADS);
+		// Front face
+		// Top Right
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex3f(8.2f, 9.0f, 0.0f);
+	
+		// Top Left
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex3f(-8.2f, 9.0f, 0.0f);
+	
+		// Bottom Left
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(-8.2f, -9.0f, 0.0f);
+	
+		// Bottom Right
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex3f(8.2f, -9.0f, 0.0f);
+	
+		glEnd();
+	
+		// Unbind texture
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 	glPopMatrix();
 
 	// ----------------------Bird_pink texture here-------------------
 	// Set it to identity matrix
 	glLoadIdentity();
 	glPushMatrix();
+	{
 
-	// translate pink_bird 
-	glTranslatef(birdPinkPosX, birdPinkPosY, -11.0f);
-	glScalef(-0.65f, 0.65f, 0.0f);
+		// translate pink_bird 
+		glTranslatef(birdPinkPosX, birdPinkPosY, -11.0f);
+		glScalef(-0.65f, 0.65f, 0.0f);
+		
+		// glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, texture_bird_pink);
 	
-	// glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, texture_bird_pink);
-
-	// Draw quad here
-	glBegin(GL_QUADS);
-	// Front face
-	// Top Right
-	glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(1.0f, 1.0f, 0.0f);
-
-	// Top Left
-	glTexCoord2f(0.0f, 1.0f);
-    glVertex3f(-1.0f, 1.0f, 0.0f);
-
-	// Bottom Left
-	glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(-1.0f, -1.0f, 0.0f);
-
-	// Bottom Right
-	glTexCoord2f(1.0f, 0.0f);
-    glVertex3f(1.0f, -1.0f, 0.0f);
-
-    glEnd();
-
-	// Unbind texture
-	glBindTexture(GL_TEXTURE_2D, 0);
+		// Draw quad here
+		glBegin(GL_QUADS);
+		// Front face
+		// Top Right
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex3f(1.0f, 1.0f, 0.0f);
+	
+		// Top Left
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex3f(-1.0f, 1.0f, 0.0f);
+	
+		// Bottom Left
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(-1.0f, -1.0f, 0.0f);
+	
+		// Bottom Right
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex3f(1.0f, -1.0f, 0.0f);
+	
+		glEnd();
+	
+		// Unbind texture
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 	glPopMatrix();
 
 	// ----------------------Bird_red texture here-------------------
 	// Set it to identity matrix
 	glLoadIdentity();
 	glPushMatrix();
+	{
 
-	// translate bird_red 
-	glTranslatef(birdRedPosX, birdRedPosY, -11.0f);
-	glScalef(0.55f, 0.55f, 0.0f);
+		// translate bird_red 
+		glTranslatef(birdRedPosX, birdRedPosY, -11.0f);
+		glScalef(0.55f, 0.55f, 0.0f);
+		
+		// glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, texture_bird_red);
 	
-	// glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, texture_bird_red);
-
-	// Draw quad here
-	glBegin(GL_QUADS);
-	// Front face
-	// Top Right
-	glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(1.0f, 1.0f, 0.0f);
-
-	// Top Left
-	glTexCoord2f(0.0f, 1.0f);
-    glVertex3f(-1.0f, 1.0f, 0.0f);
-
-	// Bottom Left
-	glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(-1.0f, -1.0f, 0.0f);
-
-	// Bottom Right
-	glTexCoord2f(1.0f, 0.0f);
-    glVertex3f(1.0f, -1.0f, 0.0f);
-
-    glEnd();
-
-	// Unbind texture
-	glBindTexture(GL_TEXTURE_2D, 0);
+		// Draw quad here
+		glBegin(GL_QUADS);
+		// Front face
+		// Top Right
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex3f(1.0f, 1.0f, 0.0f);
+	
+		// Top Left
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex3f(-1.0f, 1.0f, 0.0f);
+	
+		// Bottom Left
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(-1.0f, -1.0f, 0.0f);
+	
+		// Bottom Right
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex3f(1.0f, -1.0f, 0.0f);
+	
+		glEnd();
+	
+		// Unbind texture
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 	glPopMatrix();
 
 	// ----------------------Pearl1 texture here-------------------
 	// Set it to identity matrix
 	glLoadIdentity();
 	glPushMatrix();
-
-	// translate pearl1
-	glTranslatef(pearl1PosX, pearl1PosY, -11.0f);
-	glScalef(0.07f, 0.07f, 0.0f);
+	{
+		// translate pearl1
+		glTranslatef(pearl1PosX, pearl1PosY, -11.0f);
+		glScalef(0.07f, 0.07f, 0.0f);
+		
+		// glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, texture_pearl1);
 	
-	// glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, texture_pearl1);
-
-	// Draw quad here
-	glBegin(GL_QUADS);
-	// Front face
-	// Top Right
-	glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(1.0f, 1.0f, 0.0f);
-
-	// Top Left
-	glTexCoord2f(0.0f, 1.0f);
-    glVertex3f(-1.0f, 1.0f, 0.0f);
-
-	// Bottom Left
-	glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(-1.0f, -1.0f, 0.0f);
-
-	// Bottom Right
-	glTexCoord2f(1.0f, 0.0f);
-    glVertex3f(1.0f, -1.0f, 0.0f);
-
-    glEnd();
-
-	// Unbind texture
-	glBindTexture(GL_TEXTURE_2D, 0);
+		// Draw quad here
+		glBegin(GL_QUADS);
+		// Front face
+		// Top Right
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex3f(1.0f, 1.0f, 0.0f);
+	
+		// Top Left
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex3f(-1.0f, 1.0f, 0.0f);
+	
+		// Bottom Left
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(-1.0f, -1.0f, 0.0f);
+	
+		// Bottom Right
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex3f(1.0f, -1.0f, 0.0f);
+	
+		glEnd();
+	
+		// Unbind texture
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 	glPopMatrix();
 
 	// ----------------------stick texture here-------------------
 	// Set it to identity matrix
 	glLoadIdentity();
 	glPushMatrix();
-
-	// translate stick
-	glTranslatef(stickPosX, stickPosY, -11.0f);
-	glScalef(0.30f, 0.30f, 0.0f);
+	{
+		// translate stick
+		glTranslatef(stickPosX, stickPosY, -11.0f);
+		glScalef(0.30f, 0.30f, 0.0f);
+		
+		// glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, texture_stick);
 	
-	// glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, texture_stick);
-
-	// Draw quad here
-	glBegin(GL_QUADS);
-	// Front face
-	// Top Right
-	glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(1.0f, 1.0f, 0.0f);
-
-	// Top Left
-	glTexCoord2f(0.0f, 1.0f);
-    glVertex3f(-1.0f, 1.0f, 0.0f);
-
-	// Bottom Left
-	glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(-1.0f, -1.0f, 0.0f);
-
-	// Bottom Right
-	glTexCoord2f(1.0f, 0.0f);
-    glVertex3f(1.0f, -1.0f, 0.0f);
-
-    glEnd();
-
-	// Unbind texture
-	glBindTexture(GL_TEXTURE_2D, 0);
+		// Draw quad here
+		glBegin(GL_QUADS);
+		// Front face
+		// Top Right
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex3f(1.0f, 1.0f, 0.0f);
+	
+		// Top Left
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex3f(-1.0f, 1.0f, 0.0f);
+	
+		// Bottom Left
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(-1.0f, -1.0f, 0.0f);
+	
+		// Bottom Right
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex3f(1.0f, -1.0f, 0.0f);
+	
+		glEnd();
+	
+		// Unbind texture
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
 	glPopMatrix();
 
-	// ----------------------Grasses texture here-------------------
-	// Set it to identity matrix
-	glLoadIdentity();
-	glPushMatrix();
+	// // ----------------------Grasses texture here-------------------
+	// // Set it to identity matrix
+	// glLoadIdentity();
+	// glPushMatrix();
 
-	// translate pearl1
-	glTranslatef(grassesPosX, grassesPosY, -11.0f);
-	glScalef(0.35f, 0.35f, 0.0f);
+	// // translate pearl1
+	// glTranslatef(grassesPosX, grassesPosY, -11.0f);
+	// glScalef(0.35f, 0.35f, 0.0f);
 	
-	// glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, texture_grasses);
+	// // glActiveTexture(GL_TEXTURE1);
+	// glBindTexture(GL_TEXTURE_2D, texture_grasses);
 
-	// Draw quad here
-	glBegin(GL_QUADS);
-	// Front face
-	// Top Right
-	glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(1.0f, 1.0f, 0.0f);
+	// // Draw quad here
+	// glBegin(GL_QUADS);
+	// // Front face
+	// // Top Right
+	// glTexCoord2f(1.0f, 1.0f);
+    // glVertex3f(1.0f, 1.0f, 0.0f);
 
-	// Top Left
-	glTexCoord2f(0.0f, 1.0f);
-    glVertex3f(-1.0f, 1.0f, 0.0f);
+	// // Top Left
+	// glTexCoord2f(0.0f, 1.0f);
+    // glVertex3f(-1.0f, 1.0f, 0.0f);
 
-	// Bottom Left
-	glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(-1.0f, -1.0f, 0.0f);
+	// // Bottom Left
+	// glTexCoord2f(0.0f, 0.0f);
+    // glVertex3f(-1.0f, -1.0f, 0.0f);
 
-	// Bottom Right
-	glTexCoord2f(1.0f, 0.0f);
-    glVertex3f(1.0f, -1.0f, 0.0f);
+	// // Bottom Right
+	// glTexCoord2f(1.0f, 0.0f);
+    // glVertex3f(1.0f, -1.0f, 0.0f);
 
-    glEnd();
+    // glEnd();
 
-	// Unbind texture
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glPopMatrix();
+	// // Unbind texture
+	// glBindTexture(GL_TEXTURE_2D, 0);
+	// glPopMatrix();
 
-	// ----------------------Bird_blue texture here-------------------
-	// Set it to identity matrix
-	glLoadIdentity();
-	glPushMatrix();
+	// // ----------------------Bird_blue texture here-------------------
+	// // Set it to identity matrix
+	// glLoadIdentity();
+	// glPushMatrix();
 
-	// translate bird_red 
-	glTranslatef(birdBluePosX, birdBluePosY, -11.0f);
-	glScalef(0.22f, 0.22f, 0.0f);
+	// // translate bird_red 
+	// glTranslatef(birdBluePosX, birdBluePosY, -11.0f);
+	// glScalef(0.22f, 0.22f, 0.0f);
 	
-	// glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, texture_bird_blue);
+	// // glActiveTexture(GL_TEXTURE1);
+	// glBindTexture(GL_TEXTURE_2D, texture_bird_blue);
 
-	// Draw quad here
-	glBegin(GL_QUADS);
-	// Front face
-	// Top Right
-	glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(1.0f, 1.0f, 0.0f);
+	// // Draw quad here
+	// glBegin(GL_QUADS);
+	// // Front face
+	// // Top Right
+	// glTexCoord2f(1.0f, 1.0f);
+    // glVertex3f(1.0f, 1.0f, 0.0f);
 
-	// Top Left
-	glTexCoord2f(0.0f, 1.0f);
-    glVertex3f(-1.0f, 1.0f, 0.0f);
+	// // Top Left
+	// glTexCoord2f(0.0f, 1.0f);
+    // glVertex3f(-1.0f, 1.0f, 0.0f);
 
-	// Bottom Left
-	glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(-1.0f, -1.0f, 0.0f);
+	// // Bottom Left
+	// glTexCoord2f(0.0f, 0.0f);
+    // glVertex3f(-1.0f, -1.0f, 0.0f);
 
-	// Bottom Right
-	glTexCoord2f(1.0f, 0.0f);
-    glVertex3f(1.0f, -1.0f, 0.0f);
+	// // Bottom Right
+	// glTexCoord2f(1.0f, 0.0f);
+    // glVertex3f(1.0f, -1.0f, 0.0f);
 
-    glEnd();
+    // glEnd();
 
-	// Unbind texture
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glPopMatrix();
+	// // Unbind texture
+	// glBindTexture(GL_TEXTURE_2D, 0);
+	// glPopMatrix();
 
 	SwapBuffers(ghdc);
 }
@@ -971,10 +995,10 @@ void drawCircle(float x, float y, float z)
 void update(void)
 {
 	// code
+	// PreIntro animated here
 	if (iTimeElapsed > 0 && iTimeElapsed < 90)
 	{
-		// PreIntro animated here
-		preIntroRollY = preIntroRollY + 0.01f;
+		preIntroRollY = preIntroRollY + preIntroRollSpeed;
 		if (preIntroRollY >= 7.5f)
 		{
 			preIntroRollY = 7.5f;
@@ -982,26 +1006,26 @@ void update(void)
 	}
 
 	// Title Main animated here
-	if (iTimeElapsed > 70 && iTimeElapsed < 175)
+	if (iTimeElapsed > 50 && iTimeElapsed < 150)
 	{
-		titleMainY = titleMainY + 0.01f;
-		if (titleMainY >= 6.5f)
+		titleMainY = titleMainY + titleMainSpeed;
+		if (titleMainY >= 7.0f)
 		{
-			titleMainY = 6.5f;
+			titleMainY = 7.0f;
 		}
 	}
 		
-	if (iTimeElapsed > 160 && iTimeElapsed < 250)
+	if (iTimeElapsed > 90 && iTimeElapsed < 180)
 	{
 		// Sky animated here
-		skyPosY = skyPosY + 0.01f;
-		if (skyPosY >= 5.5f)
+		skyPosY = skyPosY + skySpeed;
+		if (skyPosY >= 5.0f)
 		{
-			skyPosY = 5.5f;
+			skyPosY = 5.0f;
 		}
 
 		// Sun animated here
-		sunPosY = sunPosY + 0.01f;
+		sunPosY = sunPosY + sunSpeed;
 		if (sunPosY >= 3.8f)
 		{
 			sunPosY = 3.8f;
@@ -1009,19 +1033,19 @@ void update(void)
 		}
 
 		// Scene animated here
-		ScenePosY = ScenePosY + 0.01f;
-		if (ScenePosY >= 0.0f)
+		ScenePosY = ScenePosY + SceneSpeed;
+		if (ScenePosY >= -4.5f)
 		{
-			ScenePosY = 0.0f;
+			ScenePosY = -4.5f;
 		}
 	}
 
-	if (iTimeElapsed > 200 && iTimeElapsed < 350)
+	if (iTimeElapsed > 150 && iTimeElapsed < 350)
 	{
 		if (isSunReached == TRUE)
 		{
-			birdPinkPosX = birdPinkPosX - 0.01f;
-			birdPinkPosY = birdPinkPosY - 0.01f;
+			birdPinkPosX = birdPinkPosX - birdPinkSpeed;
+			birdPinkPosY = birdPinkPosY - birdPinkSpeed;
 			if (birdPinkPosX <= 2.8f || birdPinkPosY <= -3.0f)
 			{
 				birdPinkPosX = 2.8f;
@@ -1031,157 +1055,134 @@ void update(void)
 		}
 	}
 
-	if (iTimeElapsed > 200 && iTimeElapsed < 350)
+	if (iTimeElapsed > 150 && iTimeElapsed < 350)
 	{
 		if (isSunReached == TRUE)
 		{
-			birdRedPosX = birdRedPosX + 0.01f;
-			birdRedPosY = birdRedPosY - 0.01f;
+			birdRedPosX = birdRedPosX + birdRedSpeed;
+			birdRedPosY = birdRedPosY - birdRedSpeed;
 			if (birdRedPosX >= 1.5f || birdRedPosY <= -3.0f)
 			{
 				birdRedPosX = 1.5f;
 				birdRedPosY = -3.0f;
 				areBirdsReachedGround = TRUE;
 			}
-		}
-	}
 
-	if (iTimeElapsed > 300 && iTimeElapsed < 420)
-	{
-		if (areBirdsReachedGround == TRUE)
-		{
-			birdPinkPosX = birdPinkPosX + 0.01f;
-			birdPinkPosY = birdPinkPosY + 0.01f;
-			if (birdPinkPosX >= 11.8f || birdPinkPosY >= 6.0f)
+			pearl1PosX = pearl1PosX - pearl1Speed;
+			pearl1PosY = pearl1PosY - pearl1Speed;
+			if (pearl1PosX <= 2.8f || pearl1PosY <= -3.5f)
 			{
-				birdPinkPosX = 11.8f;
-				birdPinkPosY = 6.0f;
-				areBirdsReachedGround = FALSE;
-				areBirdsReachedSky = TRUE;
+				pearl1PosX = 2.8f;
+				pearl1PosY = -3.5f;	
 			}
 		}
 	}
 
-	if (iTimeElapsed > 300 && iTimeElapsed < 420)
-	{
-		if (areBirdsReachedGround == TRUE)
-		{
-			birdRedPosX = birdRedPosX - 0.01f;
-			birdRedPosY = birdRedPosY + 0.01f;
-			if (birdRedPosX >= 7.5f || birdRedPosY >= 6.0f)
-			{
-				birdRedPosX = -7.5f;
-				birdRedPosY = 6.0f;
-				areBirdsReachedGround = FALSE;
-				areBirdsReachedSky = TRUE;
-			}
-		}
-	}
 
-	if (iTimeElapsed > 420 && iTimeElapsed < 600)
-	{
-		if (isSunReached == TRUE)
-		{
-			birdPinkPosX = birdPinkPosX - 0.01f;
-			birdPinkPosY = birdPinkPosY - 0.01f;
-			if (birdPinkPosX <= 2.8f || birdPinkPosY <= -3.0f)
-			{
-				birdPinkPosX = 2.8f;
-				birdPinkPosY = -3.0f;
-			}
-		}
-		pearl1PosX = pearl1PosX - 0.01f;
-		pearl1PosY = pearl1PosY - 0.01f;
-		if (pearl1PosX <= 2.8f || pearl1PosY <= -3.5f)
-		{
-			pearl1PosX = 2.8f;
-			pearl1PosY = -3.5f;	
-		}
-	}
+	// if (iTimeElapsed > 420 && iTimeElapsed < 600)
+	// {
+	// 	if (isSunReached == TRUE)
+	// 	{
+	// 		birdPinkPosX = birdPinkPosX - 0.01f;
+	// 		birdPinkPosY = birdPinkPosY - 0.01f;
+	// 		if (birdPinkPosX <= 2.8f || birdPinkPosY <= -3.0f)
+	// 		{
+	// 			birdPinkPosX = 2.8f;
+	// 			birdPinkPosY = -3.0f;
+	// 		}
+	// 	}
+	// 	pearl1PosX = pearl1PosX - 0.01f;
+	// 	pearl1PosY = pearl1PosY - 0.01f;
+	// 	if (pearl1PosX <= 2.8f || pearl1PosY <= -3.5f)
+	// 	{
+	// 		pearl1PosX = 2.8f;
+	// 		pearl1PosY = -3.5f;	
+	// 	}
+	// }
 
-	if (iTimeElapsed > 420 && iTimeElapsed < 600)
-	{
-		if (isSunReached == TRUE)
-		{
-			birdRedPosX = birdRedPosX + 0.01f;
-			birdRedPosY = birdRedPosY - 0.01f;
-			if (birdRedPosX >= 1.5f || birdRedPosY <= -3.0f)
-			{
-				birdRedPosX = 1.5f;
-				birdRedPosY = -3.0f;
-			}
-		}
-	}
+	// if (iTimeElapsed > 420 && iTimeElapsed < 600)
+	// {
+	// 	if (isSunReached == TRUE)
+	// 	{
+	// 		birdRedPosX = birdRedPosX + 0.01f;
+	// 		birdRedPosY = birdRedPosY - 0.01f;
+	// 		if (birdRedPosX >= 1.5f || birdRedPosY <= -3.0f)
+	// 		{
+	// 			birdRedPosX = 1.5f;
+	// 			birdRedPosY = -3.0f;
+	// 		}
+	// 	}
+	// }
 
-	if (iTimeElapsed > 600 && iTimeElapsed < 720)
-	{
-		birdPinkPosX = birdPinkPosX + 0.01f;
-		birdPinkPosY = birdPinkPosY + 0.01f;
-		if (birdPinkPosX >= 11.8f || birdPinkPosY >= 6.0f)
-		{
-			birdPinkPosX = 11.8f;
-			birdPinkPosY = 6.0f;
-			areBirdsReachedGround = FALSE;
-			areBirdsReachedSky = TRUE;
-		}
+	// if (iTimeElapsed > 600 && iTimeElapsed < 720)
+	// {
+	// 	birdPinkPosX = birdPinkPosX + 0.01f;
+	// 	birdPinkPosY = birdPinkPosY + 0.01f;
+	// 	if (birdPinkPosX >= 11.8f || birdPinkPosY >= 6.0f)
+	// 	{
+	// 		birdPinkPosX = 11.8f;
+	// 		birdPinkPosY = 6.0f;
+	// 		areBirdsReachedGround = FALSE;
+	// 		areBirdsReachedSky = TRUE;
+	// 	}
 
-		birdRedPosX = birdRedPosX - 0.01f;
-		birdRedPosY = birdRedPosY + 0.01f;
-		if (birdRedPosX >= 7.5f || birdRedPosY >= 6.0f)
-		{
-			birdRedPosX = -7.5f;
-			birdRedPosY = 6.0f;
-			areBirdsReachedGround = FALSE;
-			areBirdsReachedSky = TRUE;
-		}
-	}
+	// 	birdRedPosX = birdRedPosX - 0.01f;
+	// 	birdRedPosY = birdRedPosY + 0.01f;
+	// 	if (birdRedPosX >= 7.5f || birdRedPosY >= 6.0f)
+	// 	{
+	// 		birdRedPosX = -7.5f;
+	// 		birdRedPosY = 6.0f;
+	// 		areBirdsReachedGround = FALSE;
+	// 		areBirdsReachedSky = TRUE;
+	// 	}
+	// }
 
-	if (iTimeElapsed > 720 && iTimeElapsed < 900)
-	{
-		birdPinkPosX = birdPinkPosX - 0.01f;
-		birdPinkPosY = birdPinkPosY - 0.01f;
-		if (birdPinkPosX <= 3.5f || birdPinkPosY <= -3.0f)
-		{
-			birdPinkPosX = 3.5f;
-			birdPinkPosY = -3.0f;
-		}
-		grassesPosX = grassesPosX - 0.01f;
-		grassesPosY = grassesPosY - 0.01f;
-		if (grassesPosX <= 3.5f || grassesPosY <= -3.3f)
-		{
-			grassesPosX = 3.5f;
-			grassesPosY = -3.3f;	
-		}
-	}
+	// if (iTimeElapsed > 720 && iTimeElapsed < 900)
+	// {
+	// 	birdPinkPosX = birdPinkPosX - 0.01f;
+	// 	birdPinkPosY = birdPinkPosY - 0.01f;
+	// 	if (birdPinkPosX <= 3.5f || birdPinkPosY <= -3.0f)
+	// 	{
+	// 		birdPinkPosX = 3.5f;
+	// 		birdPinkPosY = -3.0f;
+	// 	}
+	// 	grassesPosX = grassesPosX - 0.01f;
+	// 	grassesPosY = grassesPosY - 0.01f;
+	// 	if (grassesPosX <= 3.5f || grassesPosY <= -3.3f)
+	// 	{
+	// 		grassesPosX = 3.5f;
+	// 		grassesPosY = -3.3f;	
+	// 	}
+	// }
 
-	if (iTimeElapsed > 720 && iTimeElapsed < 900)
-	{
-		birdRedPosX = birdRedPosX + 0.01f;
-		birdRedPosY = birdRedPosY - 0.01f;
-		if (birdRedPosX >= 1.5f || birdRedPosY <= -3.0f)
-		{
-			birdRedPosX = 1.5f;
-			birdRedPosY = -3.0f;
-		}
-		stickPosX = stickPosX + 0.01f;
-		stickPosY = stickPosY - 0.01f;
-		if (stickPosX >= 1.5f || stickPosY <= -3.0f)
-		{
-			stickPosX = 2.0f;
-			stickPosY = -3.5f;	
-		}
-	}
+	// if (iTimeElapsed > 720 && iTimeElapsed < 900)
+	// {
+	// 	birdRedPosX = birdRedPosX + 0.01f;
+	// 	birdRedPosY = birdRedPosY - 0.01f;
+	// 	if (birdRedPosX >= 1.5f || birdRedPosY <= -3.0f)
+	// 	{
+	// 		birdRedPosX = 1.5f;
+	// 		birdRedPosY = -3.0f;
+	// 	}
+	// 	stickPosX = stickPosX + 0.01f;
+	// 	stickPosY = stickPosY - 0.01f;
+	// 	if (stickPosX >= 1.5f || stickPosY <= -3.0f)
+	// 	{
+	// 		stickPosX = 2.0f;
+	// 		stickPosY = -3.5f;	
+	// 	}
+	// }
 
-	if (iTimeElapsed > 830 && iTimeElapsed < 1000)
-	{
-		birdBluePosX = birdBluePosX + 0.01f;
-		birdBluePosY = birdBluePosY - 0.01f;
-		if (birdBluePosX >= -4.4f || birdBluePosY <= -1.3f)
-		{
-			birdBluePosX = -4.4f;
-			birdBluePosY = -1.3f;
-		}
-	}
+	// if (iTimeElapsed > 830 && iTimeElapsed < 1000)
+	// {
+	// 	birdBluePosX = birdBluePosX + 0.01f;
+	// 	birdBluePosY = birdBluePosY - 0.01f;
+	// 	if (birdBluePosX >= -4.4f || birdBluePosY <= -1.3f)
+	// 	{
+	// 		birdBluePosX = -4.4f;
+	// 		birdBluePosY = -1.3f;
+	// 	}
+	// }
 }	
 
 void uninitialize(void) {
