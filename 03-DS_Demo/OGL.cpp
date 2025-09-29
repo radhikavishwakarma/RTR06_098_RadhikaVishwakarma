@@ -62,7 +62,9 @@ GLuint texture_TechStackRoll = 0;
 GLuint texture_TitleMain = 0;
 
 // Sun Position
-float sunPosY = -5.0f;
+float sunPosY = -7.0f;
+float skyPosY = -5.5f;
+float ScenePosY = -9.5f;
 BOOL isSunReached = FALSE;
 float birdPinkPosX = 11.8f;
 float birdPinkPosY = 6.0f;
@@ -82,7 +84,7 @@ float creditsRollY = -5.0f;
 float postCreditsRollY = -5.0f;
 float preIntroRollY = -5.0f;
 float techStackRollY = -5.0f;
-float titleMainY = -5.0f;
+float titleMainY = -8.0f;
 
 UINT iTimeElapsed = 0;
 UINT_PTR timerId;
@@ -555,89 +557,13 @@ void display(void)
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	// ----------------------PreIntro texture here-------------------
-	// Set it to identity matrix
-	glLoadIdentity();
-
-	glPushMatrix();
-	// translate triangle backwards
-	glTranslatef(0.0f, preIntroRollY, -13.0f);
-	glScalef(1.2f, 1.2f, 0.0f);
-
-	// glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture_PreIntroRoll);
-	
-	// Draw quad here
-	glBegin(GL_QUADS);
-	// Front face
-	// Top Right
-	glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(2.5f, 1.5f, 0.0f);
-
-	// Top Left
-	glTexCoord2f(0.0f, 1.0f);
-    glVertex3f(-2.5f, 1.5f, 0.0f);
-
-	// Bottom Left
-	glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(-2.5f, -1.5f, 0.0f);
-
-	// Bottom Right
-	glTexCoord2f(1.0f, 0.0f);
-    glVertex3f(2.5f, -1.5f, 0.0f);
-
-    glEnd();
-
-	// Unbind texture
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	glPopMatrix();
-
-	// ----------------------PreIntro texture here-------------------
-	// Set it to identity matrix
-	glLoadIdentity();
-
-	glPushMatrix();
-	// translate triangle backwards
-	glTranslatef(0.0f, preIntroRollY, -13.0f);
-	glScalef(1.2f, 1.2f, 0.0f);
-
-	// glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture_PreIntroRoll);
-	
-	// Draw quad here
-	glBegin(GL_QUADS);
-	// Front face
-	// Top Right
-	glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(2.5f, 1.5f, 0.0f);
-
-	// Top Left
-	glTexCoord2f(0.0f, 1.0f);
-    glVertex3f(-2.5f, 1.5f, 0.0f);
-
-	// Bottom Left
-	glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(-2.5f, -1.5f, 0.0f);
-
-	// Bottom Right
-	glTexCoord2f(1.0f, 0.0f);
-    glVertex3f(2.5f, -1.5f, 0.0f);
-
-    glEnd();
-
-	// Unbind texture
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-	glPopMatrix();
-
 	// ----------------------Sky texture here-------------------
 	// Set it to identity matrix
 	glLoadIdentity();
 
 	glPushMatrix();
 	// translate triangle backwards
-	glTranslatef(0.0f, 0.0f, -13.0f);
+	glTranslatef(0.0f, skyPosY, -13.0f);
 	glScalef(1.2f, 1.2f, 0.0f);
 
 	// glActiveTexture(GL_TEXTURE0);
@@ -648,19 +574,95 @@ void display(void)
 	// Front face
 	// Top Right
 	glTexCoord2f(1.0f, 1.0f);
-    glVertex3f(8.0f, 4.5f, 0.0f);
+    glVertex3f(8.0f, 9.0f, 0.0f);
 
 	// Top Left
 	glTexCoord2f(0.0f, 1.0f);
-    glVertex3f(-8.0f, 4.5f, 0.0f);
+    glVertex3f(-8.0f, 9.0f, 0.0f);
 
 	// Bottom Left
 	glTexCoord2f(0.0f, 0.0f);
-    glVertex3f(-8.0f, -4.5f, 0.0f);
+    glVertex3f(-8.0f, -9.0f, 0.0f);
 
 	// Bottom Right
 	glTexCoord2f(1.0f, 0.0f);
-    glVertex3f(8.0f, -4.5f, 0.0f);
+    glVertex3f(8.0f, -9.0f, 0.0f);
+
+    glEnd();
+
+	// Unbind texture
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glPopMatrix();
+
+	// ----------------------PreIntro texture here-------------------
+	// Set it to identity matrix
+	glLoadIdentity();
+
+	glPushMatrix();
+	// translate triangle backwards
+	glTranslatef(0.0f, preIntroRollY, -13.0f);
+	glScalef(1.2f, 1.2f, 0.0f);
+
+	// glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture_PreIntroRoll);
+	
+	// Draw quad here
+	glBegin(GL_QUADS);
+	// Front face
+	// Top Right
+	glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(2.5f, 1.5f, 0.0f);
+
+	// Top Left
+	glTexCoord2f(0.0f, 1.0f);
+    glVertex3f(-2.5f, 1.5f, 0.0f);
+
+	// Bottom Left
+	glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(-2.5f, -1.5f, 0.0f);
+
+	// Bottom Right
+	glTexCoord2f(1.0f, 0.0f);
+    glVertex3f(2.5f, -1.5f, 0.0f);
+
+    glEnd();
+
+	// Unbind texture
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glPopMatrix();
+
+	// ----------------------Title Main texture here-------------------
+	// Set it to identity matrix
+	glLoadIdentity();
+
+	glPushMatrix();
+	// translate triangle backwards
+	glTranslatef(0.0f, titleMainY, -13.0f);
+	glScalef(1.2f, 1.2f, 0.0f);
+
+	// glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture_TitleMain);
+	
+	// Draw quad here
+	glBegin(GL_QUADS);
+	// Front face
+	// Top Right
+	glTexCoord2f(1.0f, 1.0f);
+    glVertex3f(4.5f, 1.0f, 0.0f);
+
+	// Top Left
+	glTexCoord2f(0.0f, 1.0f);
+    glVertex3f(-4.5f, 1.0f, 0.0f);
+
+	// Bottom Left
+	glTexCoord2f(0.0f, 0.0f);
+    glVertex3f(-4.5f, -1.0f, 0.0f);
+
+	// Bottom Right
+	glTexCoord2f(1.0f, 0.0f);
+    glVertex3f(4.5f, -1.0f, 0.0f);
 
     glEnd();
 
@@ -687,7 +689,7 @@ void display(void)
 	glPushMatrix();
 
 	// translate triangle backwards
-	glTranslatef(0.0f, 0.0f, -11.0f);
+	glTranslatef(0.0f, ScenePosY, -11.0f);
 	// glScalef(0.2f, 0.2f, 0.0f);
 	
 	// glActiveTexture(GL_TEXTURE1);
@@ -969,8 +971,35 @@ void drawCircle(float x, float y, float z)
 void update(void)
 {
 	// code
-	if (iTimeElapsed > 0 && iTimeElapsed < 70)
+	if (iTimeElapsed > 0 && iTimeElapsed < 90)
 	{
+		// PreIntro animated here
+		preIntroRollY = preIntroRollY + 0.01f;
+		if (preIntroRollY >= 7.5f)
+		{
+			preIntroRollY = 7.5f;
+		}	
+	}
+
+	// Title Main animated here
+	if (iTimeElapsed > 70 && iTimeElapsed < 175)
+	{
+		titleMainY = titleMainY + 0.01f;
+		if (titleMainY >= 6.5f)
+		{
+			titleMainY = 6.5f;
+		}
+	}
+		
+	if (iTimeElapsed > 160 && iTimeElapsed < 250)
+	{
+		// Sky animated here
+		skyPosY = skyPosY + 0.01f;
+		if (skyPosY >= 5.5f)
+		{
+			skyPosY = 5.5f;
+		}
+
 		// Sun animated here
 		sunPosY = sunPosY + 0.01f;
 		if (sunPosY >= 3.8f)
@@ -978,9 +1007,16 @@ void update(void)
 			sunPosY = 3.8f;
 			isSunReached = TRUE;
 		}
+
+		// Scene animated here
+		ScenePosY = ScenePosY + 0.01f;
+		if (ScenePosY >= 0.0f)
+		{
+			ScenePosY = 0.0f;
+		}
 	}
 
-	if (iTimeElapsed > 70 && iTimeElapsed < 150)
+	if (iTimeElapsed > 200 && iTimeElapsed < 350)
 	{
 		if (isSunReached == TRUE)
 		{
@@ -995,7 +1031,7 @@ void update(void)
 		}
 	}
 
-	if (iTimeElapsed > 70 && iTimeElapsed < 150)
+	if (iTimeElapsed > 200 && iTimeElapsed < 350)
 	{
 		if (isSunReached == TRUE)
 		{
@@ -1010,7 +1046,7 @@ void update(void)
 		}
 	}
 
-	if (iTimeElapsed > 150 && iTimeElapsed < 220)
+	if (iTimeElapsed > 300 && iTimeElapsed < 420)
 	{
 		if (areBirdsReachedGround == TRUE)
 		{
@@ -1026,7 +1062,7 @@ void update(void)
 		}
 	}
 
-	if (iTimeElapsed > 150 && iTimeElapsed < 220)
+	if (iTimeElapsed > 300 && iTimeElapsed < 420)
 	{
 		if (areBirdsReachedGround == TRUE)
 		{
@@ -1042,7 +1078,7 @@ void update(void)
 		}
 	}
 
-	if (iTimeElapsed > 220 && iTimeElapsed < 350)
+	if (iTimeElapsed > 420 && iTimeElapsed < 600)
 	{
 		if (isSunReached == TRUE)
 		{
@@ -1054,10 +1090,6 @@ void update(void)
 				birdPinkPosY = -3.0f;
 			}
 		}
-	}
-
-	if (iTimeElapsed > 220 && iTimeElapsed < 350)
-	{
 		pearl1PosX = pearl1PosX - 0.01f;
 		pearl1PosY = pearl1PosY - 0.01f;
 		if (pearl1PosX <= 2.8f || pearl1PosY <= -3.5f)
@@ -1067,7 +1099,7 @@ void update(void)
 		}
 	}
 
-	if (iTimeElapsed > 220 && iTimeElapsed < 350)
+	if (iTimeElapsed > 420 && iTimeElapsed < 600)
 	{
 		if (isSunReached == TRUE)
 		{
@@ -1081,7 +1113,7 @@ void update(void)
 		}
 	}
 
-	if (iTimeElapsed > 350 && iTimeElapsed < 600)
+	if (iTimeElapsed > 600 && iTimeElapsed < 720)
 	{
 		birdPinkPosX = birdPinkPosX + 0.01f;
 		birdPinkPosY = birdPinkPosY + 0.01f;
@@ -1092,32 +1124,7 @@ void update(void)
 			areBirdsReachedGround = FALSE;
 			areBirdsReachedSky = TRUE;
 		}
-	}
 
-	if (iTimeElapsed > 600 && iTimeElapsed < 850)
-	{
-		birdPinkPosX = birdPinkPosX - 0.01f;
-		birdPinkPosY = birdPinkPosY - 0.01f;
-		if (birdPinkPosX <= 3.5f || birdPinkPosY <= -3.0f)
-		{
-			birdPinkPosX = 3.5f;
-			birdPinkPosY = -3.0f;
-		}
-	}
-
-	if (iTimeElapsed > 600 && iTimeElapsed < 850)
-	{
-		grassesPosX = grassesPosX - 0.01f;
-		grassesPosY = grassesPosY - 0.01f;
-		if (grassesPosX <= 3.5f || grassesPosY <= -3.3f)
-		{
-			grassesPosX = 3.5f;
-			grassesPosY = -3.3f;	
-		}
-	}
-
-	if (iTimeElapsed > 350 && iTimeElapsed < 550)
-	{
 		birdRedPosX = birdRedPosX - 0.01f;
 		birdRedPosY = birdRedPosY + 0.01f;
 		if (birdRedPosX >= 7.5f || birdRedPosY >= 6.0f)
@@ -1129,7 +1136,25 @@ void update(void)
 		}
 	}
 
-	if (iTimeElapsed > 600 && iTimeElapsed < 850)
+	if (iTimeElapsed > 720 && iTimeElapsed < 900)
+	{
+		birdPinkPosX = birdPinkPosX - 0.01f;
+		birdPinkPosY = birdPinkPosY - 0.01f;
+		if (birdPinkPosX <= 3.5f || birdPinkPosY <= -3.0f)
+		{
+			birdPinkPosX = 3.5f;
+			birdPinkPosY = -3.0f;
+		}
+		grassesPosX = grassesPosX - 0.01f;
+		grassesPosY = grassesPosY - 0.01f;
+		if (grassesPosX <= 3.5f || grassesPosY <= -3.3f)
+		{
+			grassesPosX = 3.5f;
+			grassesPosY = -3.3f;	
+		}
+	}
+
+	if (iTimeElapsed > 720 && iTimeElapsed < 900)
 	{
 		birdRedPosX = birdRedPosX + 0.01f;
 		birdRedPosY = birdRedPosY - 0.01f;
@@ -1138,11 +1163,6 @@ void update(void)
 			birdRedPosX = 1.5f;
 			birdRedPosY = -3.0f;
 		}
-	}
-
-	 // stick animated here
-	if (iTimeElapsed > 600 && iTimeElapsed < 850)
-	{
 		stickPosX = stickPosX + 0.01f;
 		stickPosY = stickPosY - 0.01f;
 		if (stickPosX >= 1.5f || stickPosY <= -3.0f)
@@ -1152,7 +1172,7 @@ void update(void)
 		}
 	}
 
-	if (iTimeElapsed > 850 && iTimeElapsed < 1500)
+	if (iTimeElapsed > 830 && iTimeElapsed < 1000)
 	{
 		birdBluePosX = birdBluePosX + 0.01f;
 		birdBluePosY = birdBluePosY - 0.01f;
