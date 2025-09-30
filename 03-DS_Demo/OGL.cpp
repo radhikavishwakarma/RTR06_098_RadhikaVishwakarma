@@ -63,41 +63,41 @@ GLuint texture_TitleMain = 0;
 
 // Sun Position
 float sunPosY = -12.0f;
-float sunSpeed = 0.001f;
+float sunSpeed = 0.0035f;
 float skyPosY = -5.0f;
-float skySpeed = 0.001f;
+float skySpeed = 0.0035f;
 float ScenePosY = -12.7f;
-float SceneSpeed = 0.001f;
+float SceneSpeed = 0.0035f;
 float birdPinkPosX = 11.8f;
 float birdPinkPosY = 6.0f;
-float birdPinkSpeed = 0.001f;
+float birdPinkSpeed = 0.0035f;
 float birdRedPosX = -7.5f;
 float birdRedPosY = 6.0f;
-float birdRedSpeed = 0.001f;
+float birdRedSpeed = 0.0035f;
 BOOL areBirdsReachedGround = FALSE;
 BOOL areBirdsReachedSky = FALSE;
 float pearl1PosX = 11.8f;
 float pearl1PosY = 5.5f;
-float pearl1Speed = 0.001f;
+float pearl1Speed = 0.0035f;
 float stickPosX = -7.0f;
 float stickPosY = 5.5f;
-float stickSpeed = 0.001f;
+float stickSpeed = 0.0035f;
 float grassesPosX = 11.8f;
 float grassesPosY = 5.7f;
-float grassesSpeed = 0.001f;
+float grassesSpeed = 0.0035f;
 float birdBluePosX = -7.4f;
 float birdBluePosY = 4.8f;
-float birdBlueSpeed = 0.001f;
+float birdBlueSpeed = 0.0035f;
 float creditsRollY = -10.0f;
-float creditsRollSpeed = 0.001f;
+float creditsRollSpeed = 0.0035f;
 float postCreditsRollY = -10.0f;
-float postCreditsRollSpeed = 0.001f;
+float postCreditsRollSpeed = 0.0035f;
 float preIntroRollY = -8.0f;
-float preIntroRollSpeed = 0.001f;
+float preIntroRollSpeed = 0.0035f;
 float techStackRollY = -10.0f;
-float techStackRollSpeed = 0.001f;
+float techStackRollSpeed = 0.0035f;
 float titleMainY = -8.0f;
-float titleMainSpeed = 0.001f;
+float titleMainSpeed = 0.0035f;
 
 UINT iTimeElapsed = 0;
 UINT_PTR timerId;
@@ -1320,19 +1320,19 @@ void update(void)
 	}
 
 	// Tech Stack roll here
-	if (iTimeElapsed > 700 && iTimeElapsed < 800)
+	if (iTimeElapsed > 700 && iTimeElapsed < 1000)
 	{
 		techStackRollY = techStackRollY + techStackRollSpeed;
 	}
 
 	// Credits roll here
-	if (iTimeElapsed > 760 && iTimeElapsed < 860)
+	if (iTimeElapsed > 760 && iTimeElapsed < 1000)
 	{
 		creditsRollY = creditsRollY + creditsRollSpeed;
 	}
 
 	// Post Credits roll here
-	if (iTimeElapsed > 820 && iTimeElapsed < 900)
+	if (iTimeElapsed > 820 && iTimeElapsed < 1000)
 	{
 		postCreditsRollY = postCreditsRollY + postCreditsRollSpeed;
 	}
