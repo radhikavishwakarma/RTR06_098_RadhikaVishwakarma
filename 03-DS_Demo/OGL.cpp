@@ -77,24 +77,24 @@ float birdRedSpeed = 0.001f;
 BOOL areBirdsReachedGround = FALSE;
 BOOL areBirdsReachedSky = FALSE;
 float pearl1PosX = 11.8f;
-float pearl1PosY = 6.0f;
+float pearl1PosY = 5.5f;
 float pearl1Speed = 0.001f;
-float stickPosX = -7.5f;
-float stickPosY = 6.0f;
+float stickPosX = -7.0f;
+float stickPosY = 5.5f;
 float stickSpeed = 0.001f;
 float grassesPosX = 11.8f;
-float grassesPosY = 6.0f;
+float grassesPosY = 5.7f;
 float grassesSpeed = 0.001f;
-float birdBluePosX = -7.5f;
-float birdBluePosY = 6.0f;
+float birdBluePosX = -7.4f;
+float birdBluePosY = 4.8f;
 float birdBlueSpeed = 0.001f;
-float creditsRollY = -5.0f;
+float creditsRollY = -10.0f;
 float creditsRollSpeed = 0.001f;
-float postCreditsRollY = -5.0f;
+float postCreditsRollY = -10.0f;
 float postCreditsRollSpeed = 0.001f;
 float preIntroRollY = -8.0f;
 float preIntroRollSpeed = 0.001f;
-float techStackRollY = -5.0f;
+float techStackRollY = -10.0f;
 float techStackRollSpeed = 0.001f;
 float titleMainY = -8.0f;
 float titleMainSpeed = 0.001f;
@@ -573,7 +573,6 @@ void display(void)
 	// ----------------------Sky texture here-------------------
 	// Set it to identity matrix
 	glLoadIdentity();
-
 	glPushMatrix();
 	{
 
@@ -612,7 +611,6 @@ void display(void)
 	// ---------------------- PreIntro texture here -------------------
 	// Set it to identity matrix
 	glLoadIdentity();
-
 	glPushMatrix();
 	{
 
@@ -651,7 +649,6 @@ void display(void)
 	// ----------------------Title Main texture here-------------------
 	// Set it to identity matrix
 	glLoadIdentity();
-
 	glPushMatrix();
 	{
 
@@ -690,13 +687,13 @@ void display(void)
 	// ----------------------Draw sun here-------------------
 	// Set it to identity matrix
 	glLoadIdentity();
-
 	glPushMatrix();
-	glTranslatef(3.8f, sunPosY, -13.0f);
-	glScalef(0.75f, 0.75f, 0.75f);
+	{
+		glTranslatef(3.8f, sunPosY, -13.0f);
+		glScalef(0.75f, 0.75f, 0.75f);
 	
-	drawCircle(0.0f, 0.0f, 0.0f);
-
+		drawCircle(0.0f, 0.0f, 0.0f);
+	}
 	glPopMatrix();
 
 	// ----------------------Scene texture here-------------------
@@ -704,7 +701,6 @@ void display(void)
 	glLoadIdentity();
 	glPushMatrix();
 	{
-
 		glTranslatef(0.0f, ScenePosY, -11.0f);
 		// glScalef(0.2f, 0.2f, 0.0f);
 		
@@ -891,79 +887,195 @@ void display(void)
 	}
 	glPopMatrix();
 
-	// // ----------------------Grasses texture here-------------------
-	// // Set it to identity matrix
-	// glLoadIdentity();
-	// glPushMatrix();
-
-	// // translate pearl1
-	// glTranslatef(grassesPosX, grassesPosY, -11.0f);
-	// glScalef(0.35f, 0.35f, 0.0f);
+	// ----------------------Grasses texture here-------------------
+	// Set it to identity matrix
+	glLoadIdentity();
+	glPushMatrix();
+	{
+		// translate pearl1
+		glTranslatef(grassesPosX, grassesPosY, -11.0f);
+		glScalef(0.45f, 0.45f, 0.0f);
+		
+		// glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, texture_grasses);
 	
-	// // glActiveTexture(GL_TEXTURE1);
-	// glBindTexture(GL_TEXTURE_2D, texture_grasses);
-
-	// // Draw quad here
-	// glBegin(GL_QUADS);
-	// // Front face
-	// // Top Right
-	// glTexCoord2f(1.0f, 1.0f);
-    // glVertex3f(1.0f, 1.0f, 0.0f);
-
-	// // Top Left
-	// glTexCoord2f(0.0f, 1.0f);
-    // glVertex3f(-1.0f, 1.0f, 0.0f);
-
-	// // Bottom Left
-	// glTexCoord2f(0.0f, 0.0f);
-    // glVertex3f(-1.0f, -1.0f, 0.0f);
-
-	// // Bottom Right
-	// glTexCoord2f(1.0f, 0.0f);
-    // glVertex3f(1.0f, -1.0f, 0.0f);
-
-    // glEnd();
-
-	// // Unbind texture
-	// glBindTexture(GL_TEXTURE_2D, 0);
-	// glPopMatrix();
-
-	// // ----------------------Bird_blue texture here-------------------
-	// // Set it to identity matrix
-	// glLoadIdentity();
-	// glPushMatrix();
-
-	// // translate bird_red 
-	// glTranslatef(birdBluePosX, birdBluePosY, -11.0f);
-	// glScalef(0.22f, 0.22f, 0.0f);
+		// Draw quad here
+		glBegin(GL_QUADS);
+		// Front face
+		// Top Right
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex3f(1.0f, 1.0f, 0.0f);
 	
-	// // glActiveTexture(GL_TEXTURE1);
-	// glBindTexture(GL_TEXTURE_2D, texture_bird_blue);
+		// Top Left
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex3f(-1.0f, 1.0f, 0.0f);
+	
+		// Bottom Left
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(-1.0f, -1.0f, 0.0f);
+	
+		// Bottom Right
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex3f(1.0f, -1.0f, 0.0f);
+	
+		glEnd();
+	
+		// Unbind texture
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+	glPopMatrix();
 
-	// // Draw quad here
-	// glBegin(GL_QUADS);
-	// // Front face
-	// // Top Right
-	// glTexCoord2f(1.0f, 1.0f);
-    // glVertex3f(1.0f, 1.0f, 0.0f);
+	// ----------------------Bird_blue texture here-------------------
+	// Set it to identity matrix
+	glLoadIdentity();
+	glPushMatrix();
+	{
+		// translate bird_red 
+		glTranslatef(birdBluePosX, birdBluePosY, -11.0f);
+		glScalef(0.22f, 0.22f, 0.0f);
+		
+		// glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, texture_bird_blue);
+	
+		// Draw quad here
+		glBegin(GL_QUADS);
+		// Front face
+		// Top Right
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex3f(1.0f, 1.0f, 0.0f);
+	
+		// Top Left
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex3f(-1.0f, 1.0f, 0.0f);
+	
+		// Bottom Left
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(-1.0f, -1.0f, 0.0f);
+	
+		// Bottom Right
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex3f(1.0f, -1.0f, 0.0f);
+	
+		glEnd();
+	
+		// Unbind texture
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+	glPopMatrix();
 
-	// // Top Left
-	// glTexCoord2f(0.0f, 1.0f);
-    // glVertex3f(-1.0f, 1.0f, 0.0f);
+	// ---------------------- Tech Stack texture here -------------------
+	// Set it to identity matrix
+	glLoadIdentity();
+	glPushMatrix();
+	{
 
-	// // Bottom Left
-	// glTexCoord2f(0.0f, 0.0f);
-    // glVertex3f(-1.0f, -1.0f, 0.0f);
+		glTranslatef(0.0f, techStackRollY, -11.0f);
+		glScalef(1.2f, 1.2f, 0.0f);
+	
+		// glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture_TechStackRoll);
+		
+		// Draw quad here
+		glBegin(GL_QUADS);
+		// Front face
+		// Top Right
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex3f(2.5f, 2.5f, 0.0f);
+	
+		// Top Left
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex3f(-2.5f, 2.5f, 0.0f);
+	
+		// Bottom Left
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(-2.5f, -2.5f, 0.0f);
+	
+		// Bottom Right
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex3f(2.5f, -2.5f, 0.0f);
+	
+		glEnd();
+	
+		// Unbind texture
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+	glPopMatrix();
 
-	// // Bottom Right
-	// glTexCoord2f(1.0f, 0.0f);
-    // glVertex3f(1.0f, -1.0f, 0.0f);
+	// ---------------------- Credits texture here -------------------
+	// Set it to identity matrix
+	glLoadIdentity();
+	glPushMatrix();
+	{
 
-    // glEnd();
+		glTranslatef(0.0f, creditsRollY, -11.0f);
+		glScalef(1.2f, 1.2f, 0.0f);
+	
+		// glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture_CreditsRoll);
+		
+		// Draw quad here
+		glBegin(GL_QUADS);
+		// Front face
+		// Top Right
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex3f(2.0f, 3.0f, 0.0f);
+	
+		// Top Left
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex3f(-2.0f, 3.0f, 0.0f);
+	
+		// Bottom Left
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(-2.0f, -3.0f, 0.0f);
+	
+		// Bottom Right
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex3f(2.0f, -3.0f, 0.0f);
+	
+		glEnd();
+	
+		// Unbind texture
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+	glPopMatrix();
 
-	// // Unbind texture
-	// glBindTexture(GL_TEXTURE_2D, 0);
-	// glPopMatrix();
+	// ---------------------- Post Credits texture here -------------------
+	// Set it to identity matrix
+	glLoadIdentity();
+	glPushMatrix();
+	{
+
+		glTranslatef(0.0f, postCreditsRollY, -11.0f);
+		glScalef(1.2f, 1.2f, 0.0f);
+	
+		// glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture_PostCreditsRoll);
+		
+		// Draw quad here
+		glBegin(GL_QUADS);
+		// Front face
+		// Top Right
+		glTexCoord2f(1.0f, 1.0f);
+		glVertex3f(2.5f, 2.5f, 0.0f);
+	
+		// Top Left
+		glTexCoord2f(0.0f, 1.0f);
+		glVertex3f(-2.5f, 2.5f, 0.0f);
+	
+		// Bottom Left
+		glTexCoord2f(0.0f, 0.0f);
+		glVertex3f(-2.5f, -2.5f, 0.0f);
+	
+		// Bottom Right
+		glTexCoord2f(1.0f, 0.0f);
+		glVertex3f(2.5f, -2.5f, 0.0f);
+	
+		glEnd();
+	
+		// Unbind texture
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+	glPopMatrix();
 
 	SwapBuffers(ghdc);
 }
@@ -1013,7 +1125,8 @@ void update(void)
 			titleMainY = 7.0f;
 		}
 	}
-		
+	
+	// Scene animated here
 	if (iTimeElapsed > 90 && iTimeElapsed < 180)
 	{
 		// Sky animated here
@@ -1038,6 +1151,7 @@ void update(void)
 		}
 	}
 
+	// Pink Bird and pearl animated here
 	if (iTimeElapsed > 120 && iTimeElapsed < 220)
 	{
 		birdPinkPosX = birdPinkPosX - birdPinkSpeed;
@@ -1057,6 +1171,7 @@ void update(void)
 		}
 	}
 
+	// Red Bird animated here
 	if (iTimeElapsed > 120 && iTimeElapsed < 220)
 	{
 		birdRedPosX = birdRedPosX + birdRedSpeed;
@@ -1069,7 +1184,8 @@ void update(void)
 		}
 	}
 
-	if (iTimeElapsed > 210 && iTimeElapsed < 450)
+	// Pink and red bird go out of screen 1st time
+	if (iTimeElapsed > 240 && iTimeElapsed < 320)
 	{
 		birdPinkPosX = birdPinkPosX + birdPinkSpeed;
 		birdPinkPosY = birdPinkPosY + birdPinkSpeed;
@@ -1088,52 +1204,138 @@ void update(void)
 		}
 	}
 
-	// if (iTimeElapsed > 720 && iTimeElapsed < 900)
-	// {
-	// 	birdPinkPosX = birdPinkPosX - 0.01f;
-	// 	birdPinkPosY = birdPinkPosY - 0.01f;
-	// 	if (birdPinkPosX <= 3.5f || birdPinkPosY <= -3.0f)
-	// 	{
-	// 		birdPinkPosX = 3.5f;
-	// 		birdPinkPosY = -3.0f;
-	// 	}
-	// 	grassesPosX = grassesPosX - 0.01f;
-	// 	grassesPosY = grassesPosY - 0.01f;
-	// 	if (grassesPosX <= 3.5f || grassesPosY <= -3.3f)
-	// 	{
-	// 		grassesPosX = 3.5f;
-	// 		grassesPosY = -3.3f;	
-	// 	}
-	// }
+	// Pink and red bird come empty
+	if (iTimeElapsed > 290 && iTimeElapsed < 420)
+	{
+		birdPinkPosX = birdPinkPosX - birdPinkSpeed;
+		birdPinkPosY = birdPinkPosY - birdPinkSpeed;
+		if (birdPinkPosX <= 3.5f || birdPinkPosY <= -3.0f)
+		{
+			birdPinkPosX = 3.5f;
+			birdPinkPosY = -3.0f;
+		}
 
-	// if (iTimeElapsed > 720 && iTimeElapsed < 900)
-	// {
-	// 	birdRedPosX = birdRedPosX + 0.01f;
-	// 	birdRedPosY = birdRedPosY - 0.01f;
-	// 	if (birdRedPosX >= 1.5f || birdRedPosY <= -3.0f)
-	// 	{
-	// 		birdRedPosX = 1.5f;
-	// 		birdRedPosY = -3.0f;
-	// 	}
-	// 	stickPosX = stickPosX + 0.01f;
-	// 	stickPosY = stickPosY - 0.01f;
-	// 	if (stickPosX >= 1.5f || stickPosY <= -3.0f)
-	// 	{
-	// 		stickPosX = 2.0f;
-	// 		stickPosY = -3.5f;	
-	// 	}
-	// }
+		birdRedPosX = birdRedPosX + birdRedSpeed;
+		birdRedPosY = birdRedPosY - birdRedSpeed;
+		if (birdRedPosX >= 1.5f || birdRedPosY <= -3.0f)
+		{
+			birdRedPosX = 1.5f;
+			birdRedPosY = -3.0f;
+		}
+	}
 
-	// if (iTimeElapsed > 830 && iTimeElapsed < 1000)
-	// {
-	// 	birdBluePosX = birdBluePosX + 0.01f;
-	// 	birdBluePosY = birdBluePosY - 0.01f;
-	// 	if (birdBluePosX >= -4.4f || birdBluePosY <= -1.3f)
-	// 	{
-	// 		birdBluePosX = -4.4f;
-	// 		birdBluePosY = -1.3f;
-	// 	}
-	// }
+	// Pink and red bird go out of screen 2nd time
+	if (iTimeElapsed > 400 && iTimeElapsed < 500)
+	{
+		birdPinkPosX = birdPinkPosX + birdPinkSpeed;
+		birdPinkPosY = birdPinkPosY + birdPinkSpeed;
+		if (birdPinkPosX >= 11.8f || birdPinkPosY >= 6.0f)
+		{
+			birdPinkPosX = 11.8f;
+			birdPinkPosY = 6.0f;
+		}
+
+		birdRedPosX = birdRedPosX - birdRedSpeed;
+		birdRedPosY = birdRedPosY + birdRedSpeed;
+		if (birdRedPosX >= 7.5f || birdRedPosY >= 6.0f)
+		{
+			birdRedPosX = -7.5f;
+			birdRedPosY = 6.0f;
+		}
+	}
+
+	// Pink and red bird come with grass and stick
+	if (iTimeElapsed > 500 && iTimeElapsed < 600)
+	{
+		birdPinkPosX = birdPinkPosX - birdPinkSpeed;
+		birdPinkPosY = birdPinkPosY - birdPinkSpeed;
+		if (birdPinkPosX <= 3.5f || birdPinkPosY <= -3.0f)
+		{
+			birdPinkPosX = 3.5f;
+			birdPinkPosY = -3.0f;
+		}
+		grassesPosX = grassesPosX - grassesSpeed;
+		grassesPosY = grassesPosY - grassesSpeed;
+		if (grassesPosX <= 3.5f || grassesPosY <= -3.3f)
+		{
+			grassesPosX = 3.5f;
+			grassesPosY = -3.3f;	
+		}
+
+		birdRedPosX = birdRedPosX + birdRedSpeed;
+		birdRedPosY = birdRedPosY - birdRedSpeed;
+		if (birdRedPosX >= 1.5f || birdRedPosY <= -3.0f)
+		{
+			birdRedPosX = 1.5f;
+			birdRedPosY = -3.0f;
+		}
+		stickPosX = stickPosX + stickSpeed;
+		stickPosY = stickPosY - stickSpeed;
+		if (stickPosX >= 2.0f || stickPosY <= -3.5f)
+		{
+			stickPosX = 2.0f;
+			stickPosY = -3.5f;	
+		}
+	}
+
+	// Blue bird comes in 
+	if (iTimeElapsed > 580 && iTimeElapsed < 650)
+	{
+		birdBluePosX = birdBluePosX + birdBlueSpeed;
+		birdBluePosY = birdBluePosY - birdBlueSpeed;
+		if (birdBluePosX >= -4.4f || birdBluePosY <= -1.3f)
+		{
+			birdBluePosX = -4.4f;
+			birdBluePosY = -1.3f;
+		}
+	}
+
+	// Move the scene up
+	if (iTimeElapsed > 650 && iTimeElapsed < 800)
+	{
+		birdPinkPosY = birdPinkPosY + birdPinkSpeed;
+		birdRedPosY = birdRedPosY + birdRedSpeed;
+		birdBluePosY = birdBluePosY + birdBlueSpeed;
+		pearl1PosY = pearl1PosY + pearl1Speed;
+		grassesPosY = grassesPosY + grassesSpeed;
+		stickPosY = stickPosY + stickSpeed;
+		skyPosY = skyPosY + skySpeed;
+		sunPosY = sunPosY + sunSpeed;
+		ScenePosY = ScenePosY + SceneSpeed;
+		
+		if (skyPosY >= 4.5f)
+		{
+			skyPosY = 4.5f;
+		}
+
+		if (sunPosY >= 13.8f)
+		{
+			sunPosY = 13.8f;
+		}
+
+		if (ScenePosY >= 4.3f)
+		{
+			ScenePosY = 4.3f;
+		}
+	}
+
+	// Tech Stack roll here
+	if (iTimeElapsed > 700 && iTimeElapsed < 800)
+	{
+		techStackRollY = techStackRollY + techStackRollSpeed;
+	}
+
+	// Credits roll here
+	if (iTimeElapsed > 760 && iTimeElapsed < 860)
+	{
+		creditsRollY = creditsRollY + creditsRollSpeed;
+	}
+
+	// Post Credits roll here
+	if (iTimeElapsed > 820 && iTimeElapsed < 900)
+	{
+		postCreditsRollY = postCreditsRollY + postCreditsRollSpeed;
+	}
 }	
 
 void uninitialize(void) {
