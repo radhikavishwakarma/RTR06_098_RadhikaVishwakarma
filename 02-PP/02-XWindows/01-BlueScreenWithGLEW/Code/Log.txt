@@ -1,0 +1,10 @@
+Program started successfully!!
+Found number of GLXFBConfigs = 72
+Receieved OpenGL Context 4.6OPENGL INFORMATION
+--------------------
+OpenGL Vendor : AMD
+OpenGL Renderer : RENOIR (renoir, LLVM 15.0.7, DRM 3.57, 6.8.0-78-generic)
+OpenGL Version : 4.6 (Core Profile) Mesa 23.2.1-1ubuntu3.1~22.04.3
+--------------------
+Initialized function completed successfully
+Program terminated successfully
