@@ -1,0 +1,4 @@
+Program started successfully!!
+Found number of GLXFBConfigs = 72
+Receieved OpenGL Context 4.6Initialized function completed successfully
+Program terminated successfully
