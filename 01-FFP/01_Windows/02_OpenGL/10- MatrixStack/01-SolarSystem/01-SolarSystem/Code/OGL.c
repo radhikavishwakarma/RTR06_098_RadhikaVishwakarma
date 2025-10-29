@@ -441,7 +441,7 @@ void display(void)
 	glRotatef((GLfloat)Year, 0.0f, 1.0f, 0.0f);
 
 	// earth is add some distance from sun
-	glTranslatef(1.0f, 0.0f, 0.0f);
+	glTranslatef(1.5f, 0.0f, 0.0f);
 
 	// Adjust the poll of sphere of earth
 	glRotatef(90.0f, 1.0f, 0.0f, 0.0f);
