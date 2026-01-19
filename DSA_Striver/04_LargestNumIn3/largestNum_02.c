@@ -1,7 +1,7 @@
 #include <stdio.h>
 int main(void)
 {
-    int a = 100;
+    int a = 10;
     int b = 21;
     int c = 48;
 
