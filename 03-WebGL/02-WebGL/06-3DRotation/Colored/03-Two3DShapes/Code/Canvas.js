@@ -500,13 +500,6 @@ function main()
 
         // Draw the vertex arrays
         gl.drawArrays(gl.TRIANGLES, 0, 12);
-        
-        gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
-        gl.drawArrays(gl.TRIANGLE_FAN, 4, 4);
-        gl.drawArrays(gl.TRIANGLE_FAN, 8, 4);
-        gl.drawArrays(gl.TRIANGLE_FAN, 12, 4);
-        gl.drawArrays(gl.TRIANGLE_FAN, 16, 4);
-        gl.drawArrays(gl.TRIANGLE_FAN, 20, 4);
 
         // Unbind with VAO
         gl.bindVertexArray(null);
@@ -528,8 +521,6 @@ function main()
         gl.bindVertexArray(vao_cube);
 
         // Draw the vertex arrays
-        gl.drawArrays(gl.TRIANGLES, 0, 16);
-        
         gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
         gl.drawArrays(gl.TRIANGLE_FAN, 4, 4);
         gl.drawArrays(gl.TRIANGLE_FAN, 8, 4);

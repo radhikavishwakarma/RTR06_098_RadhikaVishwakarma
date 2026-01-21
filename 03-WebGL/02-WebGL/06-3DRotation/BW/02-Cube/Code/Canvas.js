@@ -389,9 +389,6 @@ function main()
         gl.bindVertexArray(vao_cube);
 
         // Draw the vertex arrays
-        gl.drawArrays(gl.TRIANGLES, 0, 16);
-
-        // Draw the vertex arrays
         gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
         gl.drawArrays(gl.TRIANGLE_FAN, 4, 4);
         gl.drawArrays(gl.TRIANGLE_FAN, 8, 4);

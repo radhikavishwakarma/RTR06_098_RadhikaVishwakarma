@@ -436,13 +436,6 @@ function main()
         // Unbind with VAO
         gl.bindVertexArray(null);
 
-        gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
-        gl.drawArrays(gl.TRIANGLE_FAN, 4, 4);
-        gl.drawArrays(gl.TRIANGLE_FAN, 8, 4);
-        gl.drawArrays(gl.TRIANGLE_FAN, 12, 4);
-        gl.drawArrays(gl.TRIANGLE_FAN, 16, 4);
-        gl.drawArrays(gl.TRIANGLE_FAN, 20, 4);
-
         // Transformations
         var modelViewMatrix = mat4.create(); // this is similar to glLoadIdentity() in display for model view matrix
         var translationMatrix = mat4.create();
@@ -458,9 +451,6 @@ function main()
 
         // Bind with VAO
         gl.bindVertexArray(vao_cube);
-
-        // Draw the vertex arrays
-        gl.drawArrays(gl.TRIANGLES, 0, 16);
 
         // Draw the vertex arrays
         gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);

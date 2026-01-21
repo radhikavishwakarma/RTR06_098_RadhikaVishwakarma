@@ -399,13 +399,6 @@ function main()
         // Unbind with VAO
         gl.bindVertexArray(null);
 
-        gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
-        gl.drawArrays(gl.TRIANGLE_FAN, 4, 4);
-        gl.drawArrays(gl.TRIANGLE_FAN, 8, 4);
-        gl.drawArrays(gl.TRIANGLE_FAN, 12, 4);
-        gl.drawArrays(gl.TRIANGLE_FAN, 16, 4);
-        gl.drawArrays(gl.TRIANGLE_FAN, 20, 4);
-
         // unuse shader program object
 	    gl.useProgram(null);
         
