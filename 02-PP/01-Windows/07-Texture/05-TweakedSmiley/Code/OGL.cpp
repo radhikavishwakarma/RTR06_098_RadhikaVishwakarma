@@ -463,7 +463,7 @@ int initialize(void)
 		"if((uKeyPress != 1) && (uKeyPress != 2) && (uKeyPress != 3) && (uKeyPress != 4))" \
 		"{\n" \
 			"fragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);\n" \
-		"}\n"\
+		"}\n" \
 		"else\n" \
 		"{\n" \
 			"fragColor = texture(uTextureSampler, out_texCoord);\n" \
@@ -584,7 +584,7 @@ int initialize(void)
 	// load textures
 	if (loadGLTexture (& texture_smiley, MAKEINTRESOURCE (IDBITMAP_SMILEY)) == FALSE)
 	{
-		fprintf(gpFile, "loadGLTexture kundali texture failed \n");
+		fprintf(gpFile, "loadGLTexture smiley texture failed \n");
 		return (-7);
 	}
 

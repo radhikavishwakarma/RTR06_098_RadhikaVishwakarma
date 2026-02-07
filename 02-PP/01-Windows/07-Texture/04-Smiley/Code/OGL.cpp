@@ -515,14 +515,13 @@ int initialize(void)
 	};
 
 	const GLfloat rectangle_texCoords[] = {
-		// front
 		1.0f, 1.0f, // Top Right
 		0.0f, 1.0f, // Top Left
 		0.0f, 0.0f, // Bottom Left
 		1.0f, 0.0f, // Bottom Right
 	};
 
-	// CUBE
+	// RECTANGLE
 	// VERTEX ARRAY OBJECT FOR ARRAYS OF VERTEX OBJECT
 	glGenVertexArrays(1, &vao_rectangle);
 	// Bind vertex array object
@@ -558,7 +557,7 @@ int initialize(void)
 	// load textures
 	if (loadGLTexture (& texture_smiley, MAKEINTRESOURCE (IDBITMAP_SMILEY)) == FALSE)
 	{
-		fprintf(gpFile, "loadGLTexture kundali texture failed \n");
+		fprintf(gpFile, "loadGLTexture texture failed \n");
 		return (-7);
 	}
 
