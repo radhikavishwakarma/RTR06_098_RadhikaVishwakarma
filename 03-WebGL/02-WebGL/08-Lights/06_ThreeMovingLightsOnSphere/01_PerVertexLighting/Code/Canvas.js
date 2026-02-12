@@ -6,129 +6,135 @@ var canvas_original_height;
 var request_animation_frame = window.requestAnimationFrame ||
                                 window.mozRequestAnimationFrame ||
                                 window.oRequestAnimationFrame ||
-                                window.webKitRequestAnimationFrame ||
+                                window.webkitRequestAnimationFrame ||
                                 window.msRequestAnimationFrame;
 
 // WebGL related variables
 const MyAttributes = {
     AMC_ATTRIBUTE_POSITION : 0,
     AMC_ATTRIBUTE_COLOR : 1,
-	AMC_ATTRIBUTE_NORMAL : 2,
+    AMC_ATTRIBUTE_NORMAL : 2,
 };
 
 var shaderProgramObject = null;
 
-var vao_pyramid = null;
-var vbo_position_pyramid = null;
-var vbo_normal_pyramid = null;
+var sphere = null;
 
 var modelMatrixUniform;
 var viewMatrixUniform;
 var projectionMatrixUniform;
 
-var perspectiveProjectionMatrix;
+var angleSphere = 0.0;
 
-// parameters to be passed to the shader 
-var laUniform = new Array(2);
-var ldUniform = new Array(2);
-var lsUniform = new Array(2);
+var lightAngle0 = 0.0; // for first light
+var lightAngle1 = 0.0; // for second light
+var lightAngle2 = 0.0; // for third light
+
+// Parameters to be passed as uniform to shaders for light calculations
+var laUniform = new Array(3);
+var ldUniform = new Array(3);
+var lsUniform = new Array(3);
 var kaUniform = 0;
 var kdUniform = 0;
 var ksUniform = 0;
+var lightPositionUniform = new Array(3);
 var materialShininessUniform = 0;
-var lightPositionUniform = new Array(2);
-var lKeyPressedUniform = 0;
 
-// rotation angles
-var anglePyramid = 0.0;
+var lKeyPressedUniform = 0;
+var perspectiveProjectionMatrix;
 
 var bAnimation = false;
 var bLight = false;
 
-// Light related variables
+
+
+/// Lights related variable
 class Light {
     constructor() {
-        this.ambient = [0.0, 0.0, 0.0, 1.0];
+        this.ambient = [0.0, 0.0, 0.0, 1.0];  // Equivalent to vec4
         this.diffuse = [0.0, 0.0, 0.0, 1.0];
         this.specular = [0.0, 0.0, 0.0, 1.0];
-        this.position = [100.0, 100.0, 100.0, 1.0];
+        this.position = [0.0, 0.0, 0.0, 1.0];
     }
 }
 
-const light = [new Light(), new Light()];
+const light = [
+    new Light(), // light[0]
+    new Light(),  // light[1]
+    new Light()  // light[2]
+];
 
 var materialAmbient = [0.0, 0.0, 0.0];
-var materialDiffuse = [1.0, 1.0, 1.0];
-var materialSpecular = [1.0, 1.0, 1.0];
-var materialShininess = 128.0;
+var materialDiffuse = [0.5, 0.2, 0.7];
+var materialSpecular = [0.7, 0.7, 0.7];
+var materialShininess = 50.0;
 
 function main()
 {
-    // Get canvas
+    // get canvas
     canvas = document.getElementById("AMC")
     if (canvas == null)
     {
-        console.log("canvas element cant be optained");
+        console.log("Canvas element cannot be obtained.\n");   
     }
-    else{
-        console.log("canvas element succesfully obtained");
-
+    else
+    {
+        console.log("Canvas element succesfully obtained.\n");   
     }
 
     canvas_original_width = canvas.width;
     canvas_original_height = canvas.height;
-    
-    // Register our callback fuction as event listeners
+
+    // register our callback functions as event listeners
     window.addEventListener("keydown", keyDown, false);
     window.addEventListener("click", mouseDown, false);
     window.addEventListener("resize", resize, false);
 
-    // Initialize
+    // initialize
     initialize();
 
-    // Resize
+    // resize
     resize();
 
-    // Display
+    // display
     display();
 
     function keyDown(event)
     {
         // code
-        switch(event.keyCode)
+        // alert("Key is pressed!!\n");
+        switch (event.keyCode)
         {
-            case 65:
+            case 65:  // A or a key
             case 97:
-                // A or a key
-                if(bAnimation == false)
+                if (bAnimation == false)
                 {
                     bAnimation = true;
-                    console.log("Animation started");
+                    console.log("Animation started\n");
                 }
                 else
                 {
                     bAnimation = false;
-                    console.log("Animation stopped");
+                    console.log("Animation stopped\n");
                 }
                 break;
-            case 76:
+            case 76:  // L or l key
             case 108:
-                // L or l key
-                if(bLight == false)
+                if (bLight == false)
                 {
                     bLight = true;
-                    console.log("Light is ON");
+                    console.log("Lighting enabled\n");
                 }
                 else
                 {
                     bLight = false;
-                    console.log("Light is OFF");
+                    console.log("Lighting disabled\n");
                 }
                 break;
             case 70:
             case 102:
                 if (bFullscreen == false)
-                {
+                { 
                     toggleFullscreen();
                     bFullscreen = true;  
                 }
@@ -137,54 +143,50 @@ function main()
                     toggleFullscreen();
                     bFullscreen = false;
                 }
-                break; 
-            case 69:
+                break;
+            case 69:  // E for exit
                 uninitialize();
                 window.close();
                 break;
             default:
-                break;     
+                break;
         }
     }
 
     function mouseDown()
     {
-        // code
+        // code 
+        // alert("Mouse is clicked!!\n");
     }
 
     function toggleFullscreen()
     {
         // code
         var fullscreen_element = 
-        document.fullscreenElement ||
-        document.mozFullScreenElement ||
-        document.webkitFullscreenElement ||
-        document.msFullscreenElement ||
+        document.fullscreenElement || 
+        document.mozFullScreenElement || 
+        document.webkitFullscreenElement || 
+        document.msFullscreenElement || 
         null;
 
         if (fullscreen_element == null)
-        {
-            if (canvas.requestFullscreen)
+        {   
+            if(canvas.requestFullscreen)
             {
                 canvas.requestFullscreen();
-
             }
-            else if (canvas.mozRequestFullScreen)
+            else if(canvas.mozRequestFullScreen)
             {
                 canvas.mozRequestFullScreen();
-
-            }    
-            else if (canvas.webkitReuestFullscreen)
+            }
+            else if(canvas.webkitRequestFullScreen)
             {
-                canvas.webkitReuestFullscreen();
-
-            }    
-            else if (canvas.msReuestFullscreen)
+                canvas.webkitRequestFullScreen();
+            }
+            else if(canvas.msRequestFullScreen)
             {
-                canvas.msReuestFullscreen();
-
-            }    
-
+                canvas.msRequestFullScreen();
+            }
         }
         else
         {
@@ -204,41 +206,41 @@ function main()
             {
                 document.msExitFullScreen();
             }
-        }     
+        }
     }
 
-    // Stub Function
+    // stub functions
     function initialize()
     {
-        // Code
-        // Get 2D context from canvas
+        // code
+        // get 2D context from canvas
         gl = canvas.getContext("webgl2");
         if (gl == null)
         {
-            console.log("Webgl2 Context element cant be optained");
+            console.log("WebGL2 Context element cannot be obtained.\n");   
         }
         else
         {
-            console.log("Webgl2 Context element succesfully obtained");
+            console.log("WebGL2 Context element succesfully obtained.\n");   
         }
 
-        // Set viewport width and viewport height
+        // set viewport width and viewport height
         gl.viewportWidth = canvas.width;
         gl.viewportHeight = canvas.height;
 
         // VERTEX SHADER
         // 1. Write shader source code
-	    var vertexShaderSourceCode =         
+        var vertexShaderSourceCode = 
         "#version 300 es\n"+
-        "in vec4 aPosition;\n" +
+        "in vec4 aPosition; \n" +
         "in vec3 aNormal;\n" +
         "uniform mat4 uModelMatrix;\n" +
         "uniform mat4 uViewMatrix;\n" +
         "uniform mat4 uProjectionMatrix;\n" +
-        "uniform vec3 uLa[2];\n" +
-        "uniform vec3 uLd[2];\n" +
-        "uniform vec3 uLs[2];\n" +
-        "uniform vec4 uLightPosition[2];\n" +
+        "uniform vec3 uLa[3];\n" +
+        "uniform vec3 uLd[3];\n" +
+        "uniform vec3 uLs[3];\n" +
+        "uniform vec4 uLightPosition[3];\n" +
         "uniform vec3 uKa;\n" +
         "uniform vec3 uKd;\n" +
         "uniform vec3 uKs;\n" +
@@ -254,13 +256,13 @@ function main()
                 "mat3 normalMatrix = mat3(uViewMatrix * uModelMatrix);\n" +
                 "vec3 transformedNormal = normalize(normalMatrix * aNormal);\n" +
                 "vec3 viewerVector = normalize(-eyeCoordinates.xyz);\n" +
-                "vec3 lightDirection[2];\n" +
-                "vec3 ambientLight[2];\n" +
-                "vec3 diffuseLight[2];\n" +
-                "vec3 reflectionVector[2];\n" +
-                "vec3 specularLight[2];\n" +
+                "vec3 lightDirection[3];\n" +
+                "vec3 ambientLight[3];\n" +
+                "vec3 diffuseLight[3];\n" +
+                "vec3 reflectionVector[3];\n" +
+                "vec3 specularLight[3];\n" +
                 "out_Phong_ADS_Light = vec3(0.0f, 0.0f, 0.0f);\n" +
-                "for(int i = 0; i<2; i++)\n" +
+                "for(int i = 0; i<3; i++)\n" +
                 "{\n" +
                     "lightDirection[i] = normalize(vec3(uLightPosition[i] - eyeCoordinates));\n" +
                     "ambientLight[i] = uLa[i] * uKa;\n" +
@@ -277,7 +279,7 @@ function main()
         "}\n";
 
         // 2. Create the shader object
-        var vertexShaderObject = gl.createShader(gl.VERTEX_SHADER)
+        var vertexShaderObject = gl.createShader(gl.VERTEX_SHADER);
 
         // 3. Give the shader source code to the shader object
         gl.shaderSource(vertexShaderObject, vertexShaderSourceCode);
@@ -289,23 +291,22 @@ function main()
         if(gl.getShaderParameter(vertexShaderObject, gl.COMPILE_STATUS) == false)
         {
             var error = gl.getShaderInfoLog(vertexShaderObject);
-            if(error.length > 0)
+            if (error.length > 0)
             {
                 alert("Error: " + error);
-            }   
-            
+            }
             uninitialize();
         }
         else
         {
-            console.log("Vertex shader compilation successfully");
+            console.log("Vertex shader compilation successful\n");
         }
 
         // FRAGMENT SHADER
         // 1. Write shader source code
         var fragmentShaderSourceCode = 
         "#version 300 es\n"+
-        "precision highp float;"+
+        "precision highp float;\n" +
         "in vec3 out_Phong_ADS_Light;\n" +
         "out vec4 fragColor;\n" +
         "void main(void)\n" +
@@ -326,16 +327,15 @@ function main()
         if(gl.getShaderParameter(fragmentShaderObject, gl.COMPILE_STATUS) == false)
         {
             var error = gl.getShaderInfoLog(fragmentShaderObject);
-            if(error.length > 0)
+            if (error.length > 0)
             {
                 alert("Error: " + error);
-            }   
-            
+            }
             uninitialize();
         }
         else
         {
-            console.log("Fragment shader compilation successfully");
+            console.log("Fragment shader compilation successful\n");
         }
 
         // Create, attach, link shader program object
@@ -351,18 +351,17 @@ function main()
         if(gl.getProgramParameter(shaderProgramObject, gl.LINK_STATUS) == false)
         {
             var error = gl.getProgramInfoLog(shaderProgramObject);
-            if(error.length > 0)
+            if (error.length > 0)
             {
                 alert("Error: " + error);
-            }   
-            
+            }
             uninitialize();
         }
         else
         {
-            console.log("Shader linking successfully");
+            console.log("Shader linking successful\n");
         }
-
+        
         // Get the required uniform location from the shader
         modelMatrixUniform = gl.getUniformLocation(shaderProgramObject, "uModelMatrix");
         viewMatrixUniform = gl.getUniformLocation(shaderProgramObject, "uViewMatrix");
@@ -375,108 +374,48 @@ function main()
         ldUniform[1] = gl.getUniformLocation(shaderProgramObject, "uLd[1]");
         lsUniform[1] = gl.getUniformLocation(shaderProgramObject, "uLs[1]");
         lightPositionUniform[1] = gl.getUniformLocation(shaderProgramObject, "uLightPosition[1]");
+        laUniform[2] = gl.getUniformLocation(shaderProgramObject, "uLa[2]");
+        ldUniform[2] = gl.getUniformLocation(shaderProgramObject, "uLd[2]");
+        lsUniform[2] = gl.getUniformLocation(shaderProgramObject, "uLs[2]");
+        lightPositionUniform[2] = gl.getUniformLocation(shaderProgramObject, "uLightPosition[2]");
         kaUniform = gl.getUniformLocation(shaderProgramObject, "uKa");
         kdUniform = gl.getUniformLocation(shaderProgramObject, "uKd");
         ksUniform = gl.getUniformLocation(shaderProgramObject, "uKs");
         materialShininessUniform = gl.getUniformLocation(shaderProgramObject, "uMaterialShininess");
         lKeyPressedUniform = gl.getUniformLocation(shaderProgramObject, "uLKeyIsPressed");
 
-        // Initiliazation of two lights
-        // LIGHT 1
+        // Initializations of two lights
         light[0].ambient = [0.0, 0.0, 0.0, 1.0];
-        light[0].diffuse = [1.0, 0.0, 0.0, 1.0]; // red
-        light[0].specular = [1.0, 0.0, 0.0, 1.0]; // red
-        light[0].position = [-2.0, 0.0, 0.0, 1.0];
-        // LIGHT 2
+        light[0].diffuse = [1.0, 0.0, 0.0, 1.0];
+        light[0].specular = [1.0, 0.0, 0.0, 1.0];
+        // light[0].position = [-2.0, 0.0, 0.0, 1.0];
         light[1].ambient = [0.0, 0.0, 0.0, 1.0];
-        light[1].diffuse = [0.0, 0.0, 1.0, 1.0]; // blue
-        light[1].specular = [0.0, 0.0, 1.0, 1.0]; // blue
-        light[1].position = [2.0, 0.0, 0.0, 1.0];
+        light[1].diffuse = [0.0, 1.0, 0.0, 1.0];
+        light[1].specular = [0.0, 1.0, 0.0, 1.0];
+        // light[1].position = [2.0, 0.0, 0.0, 1.0];
+        light[2].ambient = [0.0, 0.0, 0.0, 1.0];
+        light[2].diffuse = [0.0, 0.0, 1.0, 1.0];
+        light[2].specular = [0.0, 0.0, 1.0, 1.0];
+        // light[2].position = [0.0, 2.0, 0.0, 1.0];
 
         // Provide vertex position, color, normal, texCoord etc.
-        var pyramid_position = new Float32Array([
-            0.0,  1.0,  0.0, // front-top
-            -1.0, -1.0,  1.0, // front-left
-            1.0, -1.0,  1.0, // front-right
-            
-            // right
-            0.0,  1.0,  0.0, // right-top
-            1.0, -1.0,  1.0, // right-left
-            1.0, -1.0, -1.0, // right-right
-
-            // back
-            0.0,  1.0,  0.0, // back-top
-            1.0, -1.0, -1.0, // back-left
-            -1.0, -1.0, -1.0, // back-right
-
-            // left
-            0.0,  1.0,  0.0, // left-top
-            -1.0, -1.0, -1.0, // left-left
-            -1.0, -1.0,  1.0, // left-right
-        ]);
-
-        var pyramid_normal = new Float32Array([
-            // front
-            0.000000, 0.447214,  0.894427, // front-top
-            0.000000, 0.447214,  0.894427, // front-left
-            0.000000, 0.447214,  0.894427, // front-right
-                                    
-            // right			    
-            0.894427, 0.447214,  0.000000, // right-top
-            0.894427, 0.447214,  0.000000, // right-left
-            0.894427, 0.447214,  0.000000, // right-right
-
-            // back
-            0.000000, 0.447214, -0.894427, // back-top
-            0.000000, 0.447214, -0.894427, // back-left
-            0.000000, 0.447214, -0.894427, // back-right
-
-            // left
-            -0.894427, 0.447214,  0.000000, // left-top
-            -0.894427, 0.447214,  0.000000, // left-left
-            -0.894427, 0.447214,  0.000000, // left-right
-        ]);
-
-        // PYRAMID
-        // VERTEX ARRAY OBJECT FOR ARRAYS OF VERTEX OBJECT
-	    vao_pyramid = gl.createVertexArray();
-        // Bind vertex array object
-	    gl.bindVertexArray(vao_pyramid);
-
-        // POSITION
-        vbo_position_pyramid = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, vbo_position_pyramid);
-        gl.bufferData(gl.ARRAY_BUFFER, pyramid_position, gl.STATIC_DRAW);
-        gl.vertexAttribPointer(MyAttributes.AMC_ATTRIBUTE_POSITION, 3, gl.FLOAT, gl.FALSE, 0, 0);
-        gl.enableVertexAttribArray(MyAttributes.AMC_ATTRIBUTE_POSITION);
-        gl.bindBuffer(gl.ARRAY_BUFFER, null);
-
-        // NORMAL
-        vbo_normal_pyramid = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, vbo_normal_pyramid);
-        gl.bufferData(gl.ARRAY_BUFFER, pyramid_normal, gl.STATIC_DRAW);
-        gl.vertexAttribPointer(MyAttributes.AMC_ATTRIBUTE_NORMAL, 3, gl.FLOAT, gl.FALSE, 0, 0);
-        gl.enableVertexAttribArray(MyAttributes.AMC_ATTRIBUTE_NORMAL);
-        gl.bindBuffer(gl.ARRAY_BUFFER, null);
-        
-        // unbind VAO
-	    gl.bindVertexArray(null);  
+        sphere = new Mesh();
+		makeSphere(sphere, 2.0, 30, 30);
 
         // Depth related code
         gl.clearDepth(1.0);
         gl.enable(gl.DEPTH_TEST);
         gl.depthFunc(gl.LEQUAL);
-
-        // Clear color
+        
+        // Tell OpenGL to choose the color to clear the screen
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
-
+        
         perspectiveProjectionMatrix = mat4.create(); // this is similar to glLoadIdentity() in resize
     }
 
-
     function resize()
     {
-        // Code
+        // code 
         if(bFullscreen == true)
         {
             canvas.width = window.innerWidth;
@@ -493,51 +432,61 @@ function main()
         // do perspective projection
 	    perspectiveProjectionMatrix = mat4.perspective(perspectiveProjectionMatrix, 45.0, parseFloat(canvas.width)/parseFloat(canvas.height), 0.1, 100.0);
     }
-
+    
     function display()
     {
-        // Code
+        // code
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         // use shader program object
 	    gl.useProgram(shaderProgramObject);
 
         // Transformations
-        var modelMatrix = mat4.create(); // this is similar to glLoadIdentity() in display for model view matrix
-        var viewMatrix = mat4.create(); // this is similar to glLoadIdentity() in display for view matrix
+        var modelMatrix = mat4.create();
+        var viewMatrix = mat4.create();
         var translationMatrix = mat4.create();
-        mat4.translate(translationMatrix, translationMatrix, [0.0, 0.0, -5.0]); //translate triangle backwards
+        mat4.translate(translationMatrix, translationMatrix, [0.0, 0.0, -6.0]); // translate cube backwards
         var scaleMatrix = mat4.create();
-        mat4.scale(scaleMatrix, scaleMatrix, [0.75, 0.75, 0.75]);
+        mat4.scale(scaleMatrix, scaleMatrix, [0.75, 0.75, 0.75]); // scale down to 75%
         var rotationMatrix = mat4.create();
-        // mat4.rotateX(rotationMatrix, rotationMatrix, Math.PI/180 * anglePyramid);
-        mat4.rotateY(rotationMatrix, rotationMatrix, Math.PI/180 * anglePyramid);
-        // mat4.rotateZ(rotationMatrix, rotationMatrix, Math.PI/180 * anglePyramid);
+        mat4.rotateY(rotationMatrix, rotationMatrix, Math.PI * angleSphere / 180.0); // rotate about Y axis
 
+        // modelMatrix = translationMatrix * scaleMatrix * rotationMatrix;
         mat4.multiply(modelMatrix, translationMatrix, scaleMatrix);
         mat4.multiply(modelMatrix, modelMatrix, rotationMatrix);
-
+        
         // send above matrix to the shader in "uniform"
-	    gl.uniformMatrix4fv(modelMatrixUniform, gl.FALSE, modelMatrix);
-        gl.uniformMatrix4fv(viewMatrixUniform, gl.FALSE, viewMatrix);
-	    gl.uniformMatrix4fv(projectionMatrixUniform, gl.FALSE, perspectiveProjectionMatrix);
+        // gl.uniformMatrix4fv(mvpMatrixUniform, gl.FALSE, modelViewProjectionMatrix);
+        gl.uniformMatrix4fv(modelMatrixUniform, false, modelMatrix);
+        gl.uniformMatrix4fv(viewMatrixUniform, false, viewMatrix);
+        gl.uniformMatrix4fv(projectionMatrixUniform, false, perspectiveProjectionMatrix);
 
-        if(bLight == true)
+        var radius = 3.0;
+        if (bLight == true)
         {
-            gl.uniform3fv(laUniform[0], light[0].ambient.slice(0,3));
-            gl.uniform3fv(ldUniform[0], light[0].diffuse.slice(0,3));
-            gl.uniform3fv(lsUniform[0], light[0].specular.slice(0,3));
+            light[0].position = [0.0, radius * Math.sin(Math.PI/180.0 * lightAngle0), radius * Math.cos(Math.PI/180.0 * lightAngle0), 1.0];
+            light[1].position = [radius * Math.sin(Math.PI/180.0 * lightAngle1), 0.0, radius * Math.cos(Math.PI/180.0 * lightAngle1), 1.0];
+            light[2].position = [radius * Math.cos(Math.PI/180.0 * lightAngle2), radius * Math.sin(Math.PI/180.0 * lightAngle2), 0.0, 1.0];
+            
+            gl.uniform3fv(laUniform[0], light[0].ambient.slice(0, 3));
+            gl.uniform3fv(ldUniform[0], light[0].diffuse.slice(0, 3));
+            gl.uniform3fv(lsUniform[0], light[0].specular.slice(0, 3));
             gl.uniform4fv(lightPositionUniform[0], light[0].position);
 
-            gl.uniform3fv(laUniform[1], light[1].ambient.slice(0,3));
-            gl.uniform3fv(ldUniform[1], light[1].diffuse.slice(0,3));
-            gl.uniform3fv(lsUniform[1], light[1].specular.slice(0,3));
+            gl.uniform3fv(laUniform[1], light[1].ambient.slice(0, 3));
+            gl.uniform3fv(ldUniform[1], light[1].diffuse.slice(0, 3));
+            gl.uniform3fv(lsUniform[1], light[1].specular.slice(0, 3));
             gl.uniform4fv(lightPositionUniform[1], light[1].position);
 
-            gl.uniform3fv(kaUniform, materialAmbient);
-            gl.uniform3fv(kdUniform, materialDiffuse);
-            gl.uniform3fv(ksUniform, materialSpecular);
-            gl.uniform1f(materialShininessUniform, materialShininess);
+            gl.uniform3fv(laUniform[2], light[2].ambient.slice(0, 3));
+            gl.uniform3fv(ldUniform[2], light[2].diffuse.slice(0, 3));
+            gl.uniform3fv(lsUniform[2], light[2].specular.slice(0, 3));
+            gl.uniform4fv(lightPositionUniform[2], light[2].position);
+
+            gl.uniform3fv(kaUniform, materialAmbient); // material ambient reflectance
+            gl.uniform3fv(kdUniform, materialDiffuse); // material diffuse reflectance
+            gl.uniform3fv(ksUniform, materialSpecular); // material specular reflectance
+            gl.uniform1f(materialShininessUniform, materialShininess); // material shininess
             gl.uniform1i(lKeyPressedUniform, 1);
         }
         else
@@ -545,76 +494,71 @@ function main()
             gl.uniform1i(lKeyPressedUniform, 0);
         }
 
-        // Bind with VAO
-        gl.bindVertexArray(vao_pyramid);
-
-        // Draw the vertex arrays
-        gl.drawArrays(gl.TRIANGLE_FAN, 0, 12);
-        
-        // Unbind with VAO
-        gl.bindVertexArray(null);
+        // Draw Sphere
+        sphere.draw();
 
         // unuse shader program object
-	    gl.useProgram(null);
-        
-        // Update call
+        gl.useProgram(null);
+
+        // call update
         update();
 
-        // Double buffering
-        request_animation_frame(display, canvas);
+        // double buffering
+        request_animation_frame(display, canvas);  // here the game loop is maintained via recursion
     }
 
     function update()
     {
-        // Code
-        anglePyramid = anglePyramid + 0.01;
-        if(anglePyramid >= 360.0)
+        // code
+        // rotation
+        lightAngle0 += 0.2;
+        if(lightAngle0 >= 360.0)
         {
-            anglePyramid = anglePyramid - 360.0;
+            lightAngle0 = lightAngle0 - 360.;
+        }
+
+        // update green light position
+        lightAngle1 += 0.2;
+        if(lightAngle1 >= 360.0)
+        {
+            lightAngle1 = lightAngle1 - 360.;
+        }
+
+        // update blue light position
+        lightAngle2 += 0.2;
+        if(lightAngle2 >= 360.0)
+        {
+            lightAngle2 = lightAngle2 - 360.0;
         }
     }
 
     function uninitialize()
     {
-        // Code
-        if(bFullscreen == true)
+        // code
+        if (bFullscreen == true) 
         {
             toggleFullscreen();
-        } 
-        
-        if(vbo_position_pyramid)
-        {
-            gl.deleteBuffer(vao_position);
-            vbo_position_pyramid = null;
-        } 
-        
-        if(vbo_normal_pyramid)
-        {
-            gl.deleteBuffer(vao_normal);
-            vbo_normal_pyramid = null;
         }
 
-        if(vao_pyramid)
-        {
-            gl.deleteVertexArray(vao_pyramid);
-            vao_pyramid = null;
-        }
+        if (sphere)
+		{
+			sphere.deallocate();
+			sphere = null;
+		}
 
-        if(shaderProgramObject)
+        if (shaderProgramObject)
         {
             gl.useProgram(shaderProgramObject);
             var shaderObjects = gl.getAttachedShaders(shaderProgramObject);
-            for(let i = 0; i < shaderObjects.length; i++)
+            for (let i = 0; i < shaderObjects.length; i++)
             {
                 gl.detachShader(shaderProgramObject, shaderObjects[i]);
                 gl.deleteShader(shaderObjects[i]);
-                shaderObjects[i] = null;
-            } 
+                shaderObjects[i] = null; 
+            }
             gl.useProgram(null);
             gl.deleteProgram(shaderProgramObject);
-            shaderProgramObject = null;  
-        }    
+            shaderProgramObject = null;
+        }
     }
 }
-
-

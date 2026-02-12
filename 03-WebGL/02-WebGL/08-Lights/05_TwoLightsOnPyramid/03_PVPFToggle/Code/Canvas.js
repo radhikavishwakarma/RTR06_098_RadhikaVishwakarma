@@ -19,7 +19,10 @@ const MyAttributes = {
 var shaderProgramObject_pv = null;
 var shaderProgramObject_pf = null;
 
-var sphere = null;
+var vao_pyramid = null;
+var vbo_position_pyramid = null;
+var vbo_color_pyramid = null;
+var vbo_normal_pyramid = null;
 
 var modelMatrixUniform_pv;
 var viewMatrixUniform_pv;
@@ -28,22 +31,22 @@ var modelMatrixUniform_pf;
 var viewMatrixUniform_pf;
 var projectionMatrixUniform_pf;
 
-var angleSphere = 0.0;
+var anglePyramid = 0.0;
 
 // Parameters to be passed as uniform to shaders for light calculations
-var laUniform_pv = 0;
-var ldUniform_pv = 0;
-var lsUniform_pv = 0;
+var laUniform_pv = new Array(2);
+var ldUniform_pv = new Array(2);
+var lsUniform_pv = new Array(2);
+var lightPositionUniform_pv = new Array(2);
 var kaUniform_pv = 0;
 var kdUniform_pv = 0;
 var ksUniform_pv = 0;
-var lightPositionUniform_pv = 0;
-var lightPositionUniform_pf = 0;
 var materialShininessUniform_pv = 0;
 
-var laUniform_pf = 0;
-var ldUniform_pf = 0;
-var lsUniform_pf = 0;
+var laUniform_pf = new Array(2);
+var ldUniform_pf = new Array(2);
+var lsUniform_pf = new Array(2);
+var lightPositionUniform_pf = new Array(2);
 var kaUniform_pf = 0;
 var kdUniform_pf = 0;
 var ksUniform_pf = 0;
@@ -59,10 +62,20 @@ var bPerVertex = true;
 var bPerFragment = false;
 
 /// Lights related variable
-var lightAmbient = [0.0, 0.0, 0.0];
-var lightDiffuse = [1.0, 1.0, 1.0];
-var lightSpecular = [1.0, 1.0, 1.0];
-var lightPosition = [100.0, 100.0, 100.0, 1.0];
+class Light {
+    constructor() {
+        this.ambient = [0.0, 0.0, 0.0, 1.0];  // Equivalent to vec4
+        this.diffuse = [0.0, 0.0, 0.0, 1.0];
+        this.specular = [0.0, 0.0, 0.0, 1.0];
+        this.position = [0.0, 0.0, 0.0, 1.0];
+    }
+}
+
+const light = [
+    new Light(), // light[0]
+    new Light()  // light[1]
+];
+
 var materialAmbient = [0.0, 0.0, 0.0];
 var materialDiffuse = [0.5, 0.2, 0.7];
 var materialSpecular = [0.7, 0.7, 0.7];
@@ -230,43 +243,51 @@ function main()
         // VERTEX SHADER PER-VERTEX
         // 1. Write shader source code
         var vertexShaderSourceCode_pv = 
-       "#version 300 es\n"+
+        "#version 300 es\n"+
         "in vec4 aPosition; \n" +
         "in vec3 aNormal;\n" +
         "uniform mat4 uModelMatrix;\n" +
         "uniform mat4 uViewMatrix;\n" +
         "uniform mat4 uProjectionMatrix;\n" +
-        "uniform vec3 uLa;\n" +
-        "uniform vec3 uLd;\n" +
-        "uniform vec3 uLs;\n" +
-        "uniform vec4 uLightPosition;\n" +
+        "uniform vec3 uLa[2];\n" +
+        "uniform vec3 uLd[2];\n" +
+        "uniform vec3 uLs[2];\n" +
+        "uniform vec4 uLightPosition[2];\n" +
         "uniform vec3 uKa;\n" +
         "uniform vec3 uKd;\n" +
         "uniform vec3 uKs;\n" +
         "uniform float uMaterialShininess;\n" +
-        "precision highp int;\n" +
         "uniform int uLKeyIsPressed;\n" +
         "out vec3 out_Phong_ADS_Light;\n" +
         "void main(void)\n" +
         "{\n" +
-        "gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * aPosition;\n" +
-        "if(uLKeyIsPressed == 1)\n" +
-        "{\n" +
-        "vec4 eyeCoordinates = uViewMatrix * uModelMatrix * aPosition;\n" +
-        "mat3 normalMatrix = mat3(uViewMatrix * uModelMatrix);\n" +
-        "vec3 transformedNormal = normalize(normalMatrix * aNormal);\n" +
-        "vec3 lightDirection = normalize(vec3(uLightPosition - eyeCoordinates));\n" +
-        "vec3 ambientLight = uLa * uKa;\n" +
-        "vec3 diffuseLight = uLd * uKd * max(dot(lightDirection,transformedNormal),0.0);\n" +
-        "vec3 reflectionVector = reflect(-lightDirection, transformedNormal);\n" +
-        "vec3 viewerVector = normalize(-eyeCoordinates.xyz);\n" +
-        "vec3 specularLight = uLs * uKs * pow(max(dot(reflectionVector, viewerVector), 0.0), uMaterialShininess);\n" +
-        "out_Phong_ADS_Light = ambientLight + diffuseLight + specularLight;\n" +
-        "}\n" +
-        "else\n" +
-        "{\n" +
-        "out_Phong_ADS_Light = vec3(1.0f,1.0f,1.0f);\n" +
-        "}\n" +
+            "gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * aPosition;\n" +
+            "if(uLKeyIsPressed == 1)\n" +
+            "{\n" +
+                "vec4 eyeCoordinates = uViewMatrix * uModelMatrix * aPosition;\n" +
+                "mat3 normalMatrix = mat3(uViewMatrix * uModelMatrix);\n" +
+                "vec3 transformedNormal = normalize(normalMatrix * aNormal);\n" +
+                "vec3 viewerVector = normalize(-eyeCoordinates.xyz);\n" +
+                "vec3 lightDirection[2];\n" +
+                "vec3 ambientLight[2];\n" +
+                "vec3 diffuseLight[2];\n" +
+                "vec3 reflectionVector[2];\n" +
+                "vec3 specularLight[2];\n" +
+                "out_Phong_ADS_Light = vec3(0.0f, 0.0f, 0.0f);\n" +
+                "for(int i = 0; i<2; i++)\n" +
+                "{\n" +
+                    "lightDirection[i] = normalize(vec3(uLightPosition[i] - eyeCoordinates));\n" +
+                    "ambientLight[i] = uLa[i] * uKa;\n" +
+                    "diffuseLight[i] = uLd[i] * uKd * max(dot(lightDirection[i],transformedNormal),0.0);\n" +
+                    "reflectionVector[i] = reflect(-lightDirection[i], transformedNormal);\n" +
+                    "specularLight[i] = uLs[i] * uKs * pow(max(dot(reflectionVector[i], viewerVector), 0.0), uMaterialShininess);\n" +
+                    "out_Phong_ADS_Light = out_Phong_ADS_Light + ambientLight[i] + diffuseLight[i] + specularLight[i];\n" +
+                "}\n" +
+            "}\n" +
+            "else\n" +
+            "{\n" +
+                "out_Phong_ADS_Light = vec3(1.0f, 1.0f, 1.0f);\n" +
+            "}\n" +
         "}\n";
 
         // 2. Create the shader object
@@ -357,10 +378,14 @@ function main()
         modelMatrixUniform_pv = gl.getUniformLocation(shaderProgramObject_pv, "uModelMatrix");
         viewMatrixUniform_pv = gl.getUniformLocation(shaderProgramObject_pv, "uViewMatrix");
         projectionMatrixUniform_pv = gl.getUniformLocation(shaderProgramObject_pv, "uProjectionMatrix");
-        laUniform_pv = gl.getUniformLocation(shaderProgramObject_pv, "uLa");
-        ldUniform_pv = gl.getUniformLocation(shaderProgramObject_pv, "uLd");
-        lsUniform_pv = gl.getUniformLocation(shaderProgramObject_pv, "uLs");
-        lightPositionUniform_pv = gl.getUniformLocation(shaderProgramObject_pv, "uLightPosition");
+        laUniform_pv[0] = gl.getUniformLocation(shaderProgramObject_pv, "uLa[0]");
+        ldUniform_pv[0] = gl.getUniformLocation(shaderProgramObject_pv, "uLd[0]");
+        lsUniform_pv[0] = gl.getUniformLocation(shaderProgramObject_pv, "uLs[0]");
+        lightPositionUniform_pv[0] = gl.getUniformLocation(shaderProgramObject_pv, "uLightPosition[0]");
+        laUniform_pv[1] = gl.getUniformLocation(shaderProgramObject_pv, "uLa[1]");
+        ldUniform_pv[1] = gl.getUniformLocation(shaderProgramObject_pv, "uLd[1]");
+        lsUniform_pv[1] = gl.getUniformLocation(shaderProgramObject_pv, "uLs[1]");
+        lightPositionUniform_pv[1] = gl.getUniformLocation(shaderProgramObject_pv, "uLightPosition[1]");
         kaUniform_pv = gl.getUniformLocation(shaderProgramObject_pv, "uKa");
         kdUniform_pv = gl.getUniformLocation(shaderProgramObject_pv, "uKd");
         ksUniform_pv = gl.getUniformLocation(shaderProgramObject_pv, "uKs");
@@ -377,34 +402,26 @@ function main()
         "uniform mat4 uModelMatrix;\n" +
         "uniform mat4 uViewMatrix;\n" +
         "uniform mat4 uProjectionMatrix;\n" +
-        "uniform vec3 uLa;\n" +
-        "uniform vec3 uLd;\n" +
-        "uniform vec3 uLs;\n" +
-        "uniform vec4 uLightPosition;\n" +
-        "uniform vec3 uKa;\n" +
-        "uniform vec3 uKd;\n" +
-        "uniform vec3 uKs;\n" +
-        "uniform float uMaterialShininess;\n" +
+        "uniform vec4 uLightPosition[2];\n" +
         "precision highp int;\n" +
         "uniform int uLKeyIsPressed;\n" +
-        "out vec3 transformedNormal;\n" +
-        "out vec3 lightDirection;\n" +
-        "out vec3 viewerVector;\n" +
-        "out vec3 ambientLight;\n" +
-        "out vec3 diffuseLight;\n" +
-        "out vec3 specularLight;\n" +
+        "out vec3 out_transformedNormal;\n" +
+        "out vec3 out_lightDirection[2];\n" +
+        "out vec3 out_viewerVector;\n" +
         "void main(void)\n" +
         "{\n" +
-        "gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * aPosition;\n" +
-        "if(uLKeyIsPressed == 1)\n" +
-        "{\n" +
-        "vec4 eyeCoordinates = uViewMatrix * uModelMatrix * aPosition;\n" +
-        "mat3 normalMatrix = mat3(uViewMatrix * uModelMatrix);\n" +
-        "transformedNormal = normalize(normalMatrix * aNormal);\n" +
-        "lightDirection = normalize(vec3(uLightPosition - eyeCoordinates));\n" +
-        "viewerVector = normalize(-eyeCoordinates.xyz);\n" +
-        "ambientLight = uLa * uKa;\n" +
-        "}\n" +
+            "gl_Position = uProjectionMatrix * uViewMatrix * uModelMatrix * aPosition;\n" +
+            "if(uLKeyIsPressed == 1)\n" +
+            "{\n" +
+                "vec4 eyeCoordinates = uViewMatrix * uModelMatrix * aPosition;\n" +
+                "mat3 normalMatrix = mat3(uViewMatrix * uModelMatrix);\n" +
+                "out_transformedNormal = normalMatrix * aNormal;\n" +
+                "out_viewerVector = -eyeCoordinates.xyz;\n" +
+                "for(int i = 0; i<2; i++)\n" +
+                "{\n" +
+                    "out_lightDirection[i] = vec3(uLightPosition[i] - eyeCoordinates);\n" +
+                "}\n" +
+            "}\n" +
         "}\n";
 
         // 2. Create the shader object
@@ -436,13 +453,14 @@ function main()
         var fragmentShaderSourceCode_pf = 
         "#version 300 es\n"+
         "precision highp float;\n" +
-        "in vec3 transformedNormal;\n" +
-        "in vec3 lightDirection;\n" +
-        "in vec3 viewerVector;\n" +
-        "in vec3 ambientLight;\n" +
-        "uniform vec3 uLd;\n" +
+        "in vec3 out_transformedNormal;\n" +
+        "in vec3 out_lightDirection[2];\n" +
+        "in vec3 out_viewerVector;\n" +
+        "uniform vec3 uLa[2];\n" +
+        "uniform vec3 uLd[2];\n" +
+        "uniform vec3 uLs[2];\n" +
+        "uniform vec3 uKa;\n" +
         "uniform vec3 uKd;\n" +
-        "uniform vec3 uLs;\n" +
         "uniform vec3 uKs;\n" +
         "uniform float uMaterialShininess;\n" +
         "precision highp int;\n" +
@@ -450,19 +468,31 @@ function main()
         "out vec4 fragColor;\n" +
         "void main(void)\n" +
         "{\n" +
-        "vec3 phongADS;\n" +
-        "if(uLKeyIsPressed == 1)\n" +
-        "{\n" +
-        "vec3 diffuseLight = uLd * uKd * max(dot(lightDirection, transformedNormal), 0.0);\n" +
-        "vec3 reflectionVector = reflect(-lightDirection, transformedNormal);\n" +
-        "vec3 specularLight = uLs * uKs * pow(max(dot(reflectionVector, viewerVector), 0.0), uMaterialShininess);\n" +
-        "phongADS = ambientLight + diffuseLight + specularLight;\n" +
-        "}\n" +
-        "else\n" +
-        "{\n" +
-        "phongADS = vec3(1.0, 1.0, 1.0);\n" +
-        "}\n" +
-        "fragColor = vec4(phongADS, 1.0);\n" +
+            "vec3 phong_ADS_Light;\n" +
+            "vec3 normalizedLightDirection[2];\n" +
+            "vec3 ambientLight[2];\n" +
+            "vec3 diffuseLight[2];\n" +
+            "vec3 reflectionVector[2];\n" +
+            "vec3 specularLight[2];\n" +
+            "if(uLKeyIsPressed == 1)\n" +
+            "{\n" +
+                "vec3 normalizedTransformedNormal = normalize(out_transformedNormal);\n" +
+                "vec3 normalizedViewerVector = normalize(out_viewerVector);\n" +
+                "for(int i = 0; i<2; i++)\n" +
+                "{\n" +
+                    "normalizedLightDirection[i] = normalize(out_lightDirection[i]);\n" +
+                    "ambientLight[i] = uLa[i] * uKa;\n" +
+                    "diffuseLight[i] = uLd[i] * uKd * max(dot(normalizedLightDirection[i], normalizedTransformedNormal), 0.0);\n" +
+                    "reflectionVector[i] = reflect(-normalizedLightDirection[i], normalizedTransformedNormal);\n" +
+                    "specularLight[i] = uLs[i] * uKs * pow(max(dot(reflectionVector[i], normalizedViewerVector), 0.0), uMaterialShininess);\n" +
+                    "phong_ADS_Light = phong_ADS_Light + ambientLight[i] + diffuseLight[i] + specularLight[i];\n" +
+                "}\n" +
+            "}\n" +
+            "else\n" +
+            "{\n" +
+                "phong_ADS_Light = vec3(1.0, 1.0, 1.0);\n" +
+            "}\n" +
+            "fragColor = vec4(phong_ADS_Light, 1.0);\n" +
         "}\n";
 
         // 2. Create the shader object
@@ -517,19 +547,96 @@ function main()
         modelMatrixUniform_pf = gl.getUniformLocation(shaderProgramObject_pf, "uModelMatrix");
         viewMatrixUniform_pf = gl.getUniformLocation(shaderProgramObject_pf, "uViewMatrix");
         projectionMatrixUniform_pf = gl.getUniformLocation(shaderProgramObject_pf, "uProjectionMatrix");
-        laUniform_pf = gl.getUniformLocation(shaderProgramObject_pf, "uLa");
-        ldUniform_pf = gl.getUniformLocation(shaderProgramObject_pf, "uLd");
-        lsUniform_pf = gl.getUniformLocation(shaderProgramObject_pf, "uLs");
-        lightPositionUniform_pf = gl.getUniformLocation(shaderProgramObject_pf, "uLightPosition");
+        laUniform_pf[0] = gl.getUniformLocation(shaderProgramObject_pf, "uLa[0]");
+        ldUniform_pf[0] = gl.getUniformLocation(shaderProgramObject_pf, "uLd[0]");
+        lsUniform_pf[0] = gl.getUniformLocation(shaderProgramObject_pf, "uLs[0]");
+        lightPositionUniform_pf[0] = gl.getUniformLocation(shaderProgramObject_pf, "uLightPosition[0]");
+        laUniform_pf[1] = gl.getUniformLocation(shaderProgramObject_pf, "uLa[1]");
+        ldUniform_pf[1] = gl.getUniformLocation(shaderProgramObject_pf, "uLd[1]");
+        lsUniform_pf[1] = gl.getUniformLocation(shaderProgramObject_pf, "uLs[1]");
+        lightPositionUniform_pf[1] = gl.getUniformLocation(shaderProgramObject_pf, "uLightPosition[1]");
         kaUniform_pf = gl.getUniformLocation(shaderProgramObject_pf, "uKa");
         kdUniform_pf = gl.getUniformLocation(shaderProgramObject_pf, "uKd");
         ksUniform_pf = gl.getUniformLocation(shaderProgramObject_pf, "uKs");
         materialShininessUniform_pf = gl.getUniformLocation(shaderProgramObject_pf, "uMaterialShininess");
         lKeyPressedUniform_pf = gl.getUniformLocation(shaderProgramObject_pf, "uLKeyIsPressed");
 
+        // Initializations of two lights
+        light[0].ambient = [0.0, 0.0, 0.0, 1.0];
+        light[0].diffuse = [1.0, 0.0, 0.0, 1.0];
+        light[0].specular = [1.0, 0.0, 0.0, 1.0];
+        light[0].position = [-2.0, 1.0, 0.0, 1.0];
+        light[1].ambient = [0.0, 0.0, 0.0, 1.0];
+        light[1].diffuse = [0.0, 0.0, 1.0, 1.0];
+        light[1].specular = [0.0, 0.0, 1.0, 1.0];
+        light[1].position = [2.0, 1.0, 0.0, 1.0];
+
         // Provide vertex position, color, normal, texCoord etc.
-        sphere = new Mesh();
-		makeSphere(sphere, 2.0, 30, 30);
+        var pyramid_position = new Float32Array([
+            // front
+            0.0,  1.0,  0.0, // front-top
+            -1.0, -1.0,  1.0, // front-left
+            1.0, -1.0,  1.0, // front-right
+            
+            // right
+            0.0,  1.0,  0.0, // right-top
+            1.0, -1.0,  1.0, // right-left
+            1.0, -1.0, -1.0, // right-right
+
+            // back
+            0.0,  1.0,  0.0, // back-top
+            1.0, -1.0, -1.0, // back-left
+            -1.0, -1.0, -1.0, // back-right
+
+            // left
+            0.0,  1.0,  0.0, // left-top
+            -1.0, -1.0, -1.0, // left-left
+            -1.0, -1.0,  1.0, // left-right
+        ]);
+
+        // normals for pyramid
+        var pyramid_normal = new Float32Array([
+            // front
+            0.000000, 0.447214,  0.894427, // front-top
+            0.000000, 0.447214,  0.894427, // front-left
+            0.000000, 0.447214,  0.894427, // front-right
+                                    
+            // right			    
+            0.894427, 0.447214,  0.000000, // right-top
+            0.894427, 0.447214,  0.000000, // right-left
+            0.894427, 0.447214,  0.000000, // right-right
+
+            // back
+            0.000000, 0.447214, -0.894427, // back-top
+            0.000000, 0.447214, -0.894427, // back-left
+            0.000000, 0.447214, -0.894427, // back-right
+
+            // left
+            -0.894427, 0.447214,  0.000000, // left-top
+            -0.894427, 0.447214,  0.000000, // left-left
+            -0.894427, 0.447214,  0.000000, // left-right
+        ]);
+
+        // Create VAO for pyramid
+        vao_pyramid = gl.createVertexArray();
+        gl.bindVertexArray(vao_pyramid);
+
+        // Create VBO for position
+        vbo_position_pyramid = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vbo_position_pyramid);
+        gl.bufferData(gl.ARRAY_BUFFER, pyramid_position, gl.STATIC_DRAW);
+        gl.vertexAttribPointer(MyAttributes.AMC_ATTRIBUTE_POSITION, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(MyAttributes.AMC_ATTRIBUTE_POSITION);
+
+        // Create VBO for normal
+        vbo_normal_pyramid = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, vbo_normal_pyramid);
+        gl.bufferData(gl.ARRAY_BUFFER, pyramid_normal, gl.STATIC_DRAW);
+        gl.vertexAttribPointer(MyAttributes.AMC_ATTRIBUTE_NORMAL, 3, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(MyAttributes.AMC_ATTRIBUTE_NORMAL);
+
+        // Unbind VAO
+        gl.bindVertexArray(null);
 
         // Depth related code
         gl.clearDepth(1.0);
@@ -571,11 +678,11 @@ function main()
         var modelMatrix = mat4.create();
         var viewMatrix = mat4.create();
         var translationMatrix = mat4.create();
-        mat4.translate(translationMatrix, translationMatrix, [0.0, 0.0, -6.0]); // translate cube backwards
+        mat4.translate(translationMatrix, translationMatrix, [0.0, 0.0, -3.0]); // translate cube backwards
         var scaleMatrix = mat4.create();
         mat4.scale(scaleMatrix, scaleMatrix, [0.75, 0.75, 0.75]); // scale down to 75%
         var rotationMatrix = mat4.create();
-        mat4.rotateY(rotationMatrix, rotationMatrix, Math.PI * angleSphere / 180.0); // rotate about Y axis
+        mat4.rotateY(rotationMatrix, rotationMatrix, Math.PI * anglePyramid / 180.0); // rotate about Y axis
 
         // modelMatrix = translationMatrix * scaleMatrix * rotationMatrix;
         mat4.multiply(modelMatrix, translationMatrix, scaleMatrix);
@@ -593,10 +700,14 @@ function main()
 
             if (bLight == true)
             {
-                gl.uniform3fv(laUniform_pv, lightAmbient);
-                gl.uniform3fv(ldUniform_pv, lightDiffuse);
-                gl.uniform3fv(lsUniform_pv, lightSpecular);
-                gl.uniform4fv(lightPositionUniform_pv, lightPosition);
+                gl.uniform3fv(laUniform_pv[0], light[0].ambient.slice(0,3));
+                gl.uniform3fv(ldUniform_pv[0], light[0].diffuse.slice(0,3));
+                gl.uniform3fv(lsUniform_pv[0], light[0].specular.slice(0,3));
+                gl.uniform4fv(lightPositionUniform_pv[0], light[0].position);
+                gl.uniform3fv(laUniform_pv[1], light[1].ambient.slice(0,3));
+                gl.uniform3fv(ldUniform_pv[1], light[1].diffuse.slice(0,3));
+                gl.uniform3fv(lsUniform_pv[1], light[1].specular.slice(0,3));
+                gl.uniform4fv(lightPositionUniform_pv[1], light[1].position);
                 gl.uniform3fv(kaUniform_pv, materialAmbient); // material ambient reflectance
                 gl.uniform3fv(kdUniform_pv, materialDiffuse); // material diffuse reflectance
                 gl.uniform3fv(ksUniform_pv, materialSpecular); // material specular reflectance
@@ -619,10 +730,14 @@ function main()
 
             if (bLight == true)
             {
-                gl.uniform3fv(laUniform_pf, lightAmbient);
-                gl.uniform3fv(ldUniform_pf, lightDiffuse);
-                gl.uniform3fv(lsUniform_pf, lightSpecular);
-                gl.uniform4fv(lightPositionUniform_pf, lightPosition);
+                gl.uniform3fv(laUniform_pf[0], light[0].ambient.slice(0,3));
+                gl.uniform3fv(ldUniform_pf[0], light[0].diffuse.slice(0,3));
+                gl.uniform3fv(lsUniform_pf[0], light[0].specular.slice(0,3));
+                gl.uniform4fv(lightPositionUniform_pf[0], light[0].position);
+                gl.uniform3fv(laUniform_pf[1], light[1].ambient.slice(0,3));
+                gl.uniform3fv(ldUniform_pf[1], light[1].diffuse.slice(0,3));
+                gl.uniform3fv(lsUniform_pf[1], light[1].specular.slice(0,3));
+                gl.uniform4fv(lightPositionUniform_pf[1], light[1].position);
                 gl.uniform3fv(kaUniform_pf, materialAmbient); // material ambient reflectance
                 gl.uniform3fv(kdUniform_pf, materialDiffuse); // material diffuse reflectance
                 gl.uniform3fv(ksUniform_pf, materialSpecular); // material specular reflectance
@@ -635,7 +750,14 @@ function main()
             }
         }
 
-        sphere.draw();
+        // Bind with VAO_pyramid
+        gl.bindVertexArray(vao_pyramid);
+
+        // Draw the vertex arrays
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, 12);
+
+        // Unbind with VAO_pyramid
+        gl.bindVertexArray(null);
 
         // unuse shader program object
         gl.useProgram(null);
@@ -651,12 +773,12 @@ function main()
     {
         // code
         // rotation
-        // angleSphere = angleSphere + 0.1;
+        anglePyramid = anglePyramid + 0.1;
         
-        // if(angleSphere >= 360.0)
-        // {
-        //     angleSphere = angleSphere - 360.0;
-        // }
+        if(anglePyramid >= 360.0)
+        {
+            anglePyramid = anglePyramid - 360.0;
+        }
     }
 
     function uninitialize()
@@ -667,11 +789,29 @@ function main()
             toggleFullscreen();
         }
 
-        if (sphere)
-		{
-			sphere.deallocate();
-			sphere = null;
-		}
+        if (vbo_position_pyramid)
+        {
+            gl.deleteBuffer(vbo_position_pyramid);
+            vbo_position_pyramid = null;
+        }
+
+        if (vbo_color_pyramid)
+        {
+            gl.deleteBuffer(vbo_color_pyramid);
+            vbo_color_pyramid = null;
+        }
+
+        if (vbo_normal_pyramid)
+        {
+            gl.deleteBuffer(vbo_normal_pyramid);
+            vbo_normal_pyramid = null;
+        }
+
+        if (vao_pyramid)
+        {
+            gl.deleteVertexArray(vao_pyramid);
+            vao_pyramid = null;
+        }
 
         if (shaderProgramObject_pv)
         {
