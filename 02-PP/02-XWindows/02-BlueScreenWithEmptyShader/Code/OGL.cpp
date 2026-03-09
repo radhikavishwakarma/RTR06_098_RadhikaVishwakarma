@@ -162,7 +162,7 @@ int main(void)
 		}
 	}
 
-	// fprintf(gpFile, "LOKI = %d\n", indexOfBestGLXFBConfig);
+	
 
 	bestGLXFBConfig = pGLXFBConfigs[indexOfBestGLXFBConfig]; // set the global glxFBConfig;
 	gLXFBConfig = bestGLXFBConfig;
