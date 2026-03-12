@@ -6,51 +6,50 @@ var canvas_original_height;
 var request_animation_frame = window.requestAnimationFrame ||
                                 window.mozRequestAnimationFrame ||
                                 window.oRequestAnimationFrame ||
-                                window.webkitRequestAnimationFrame ||
+                                window.webKitRequestAnimationFrame ||
                                 window.msRequestAnimationFrame;
 
 // WebGL related variables
 const MyAttributes = {
     AMC_ATTRIBUTE_POSITION : 0,
     AMC_ATTRIBUTE_COLOR : 1,
-    AMC_ATTRIBUTE_NORMAL : 2,
+	AMC_ATTRIBUTE_NORMAL : 2,
 };
 
 var shaderProgramObject = null;
 
 var vao_pyramid = null;
 var vbo_position_pyramid = null;
-var vbo_color_pyramid = null;
 var vbo_normal_pyramid = null;
 
 var modelMatrixUniform;
 var viewMatrixUniform;
 var projectionMatrixUniform;
 
-var anglePyramid = 0.0;
+var perspectiveProjectionMatrix;
 
-// Parameters to be passed as uniform to shaders for light calculations
+// parameters to be passed to the shader 
 var laUniform = new Array(2);
 var ldUniform = new Array(2);
 var lsUniform = new Array(2);
 var kaUniform = 0;
 var kdUniform = 0;
 var ksUniform = 0;
-var lightPositionUniform = new Array(2);
 var materialShininessUniform = 0;
-
+var lightPositionUniform = new Array(2);
 var lKeyPressedUniform = 0;
-var perspectiveProjectionMatrix;
+
+// rotation angles
+var anglePyramid = 0.0;
 
 var bAnimation = false;
 var bLight = false;
 
-
-
-/// Lights related variable
-class Light {
-    constructor() {
-        this.ambient = [0.0, 0.0, 0.0, 1.0];  // Equivalent to vec4
+class Light
+{
+    constructor()
+    {
+        this.ambient = [0.0, 0.0, 0.0, 1.0];
         this.diffuse = [0.0, 0.0, 0.0, 1.0];
         this.specular = [0.0, 0.0, 0.0, 1.0];
         this.position = [0.0, 0.0, 0.0, 1.0];
@@ -58,81 +57,84 @@ class Light {
 }
 
 const light = [
-    new Light(), // light[0]
-    new Light()  // light[1]
+    new Light(), // light[0] is for light 1
+    new Light() // light[1] is for light 2
 ];
 
 var materialAmbient = [0.0, 0.0, 0.0];
-var materialDiffuse = [0.5, 0.2, 0.7];
-var materialSpecular = [0.7, 0.7, 0.7];
-var materialShininess = 50.0;
+var materialDiffuse = [1.0, 1.0, 1.0];
+var materialSpecular = [1.0, 1.0, 1.0];
+var materialShininess = 128.0;
+
+
 
 function main()
 {
-    // get canvas
+    // Get canvas
     canvas = document.getElementById("AMC")
     if (canvas == null)
     {
-        console.log("Canvas element cannot be obtained.\n");   
+        console.log("canvas element cant be optained");
     }
-    else
-    {
-        console.log("Canvas element succesfully obtained.\n");   
+    else{
+        console.log("canvas element succesfully obtained");
+
     }
 
     canvas_original_width = canvas.width;
     canvas_original_height = canvas.height;
-
-    // register our callback functions as event listeners
+    
+    // Register our callback fuction as event listeners
     window.addEventListener("keydown", keyDown, false);
     window.addEventListener("click", mouseDown, false);
     window.addEventListener("resize", resize, false);
 
-    // initialize
+    // Initialize
     initialize();
 
-    // resize
+    // Resize
     resize();
 
-    // display
+    // Display
     display();
 
     function keyDown(event)
     {
         // code
-        // alert("Key is pressed!!\n");
-        switch (event.keyCode)
+        switch(event.keyCode)
         {
-            case 65:  // A or a key
+            case 65:
             case 97:
-                if (bAnimation == false)
+                // A or a key
+                if(bAnimation == false)
                 {
                     bAnimation = true;
-                    console.log("Animation started\n");
+                    console.log("Animation started");
                 }
                 else
                 {
                     bAnimation = false;
-                    console.log("Animation stopped\n");
+                    console.log("Animation stopped");
                 }
                 break;
-            case 76:  // L or l key
+            case 76:
             case 108:
-                if (bLight == false)
+                // L or l key
+                if(bLight == false)
                 {
                     bLight = true;
-                    console.log("Lighting enabled\n");
+                    console.log("Light is ON");
                 }
                 else
                 {
                     bLight = false;
-                    console.log("Lighting disabled\n");
+                    console.log("Light is OFF");
                 }
                 break;
             case 70:
             case 102:
                 if (bFullscreen == false)
-                { 
+                {
                     toggleFullscreen();
                     bFullscreen = true;  
                 }
@@ -141,50 +143,54 @@ function main()
                     toggleFullscreen();
                     bFullscreen = false;
                 }
-                break;
-            case 69:  // E for exit
+                break; 
+            case 69:
                 uninitialize();
                 window.close();
                 break;
             default:
-                break;
+                break;     
         }
     }
 
     function mouseDown()
     {
-        // code 
-        // alert("Mouse is clicked!!\n");
+        // code
     }
 
     function toggleFullscreen()
     {
         // code
         var fullscreen_element = 
-        document.fullscreenElement || 
-        document.mozFullScreenElement || 
-        document.webkitFullscreenElement || 
-        document.msFullscreenElement || 
+        document.fullscreenElement ||
+        document.mozFullScreenElement ||
+        document.webkitFullscreenElement ||
+        document.msFullscreenElement ||
         null;
 
         if (fullscreen_element == null)
-        {   
-            if(canvas.requestFullscreen)
+        {
+            if (canvas.requestFullscreen)
             {
                 canvas.requestFullscreen();
+
             }
-            else if(canvas.mozRequestFullScreen)
+            else if (canvas.mozRequestFullScreen)
             {
                 canvas.mozRequestFullScreen();
-            }
-            else if(canvas.webkitRequestFullScreen)
+
+            }    
+            else if (canvas.webkitReuestFullscreen)
             {
-                canvas.webkitRequestFullScreen();
-            }
-            else if(canvas.msRequestFullScreen)
+                canvas.webkitReuestFullscreen();
+
+            }    
+            else if (canvas.msReuestFullscreen)
             {
-                canvas.msRequestFullScreen();
-            }
+                canvas.msReuestFullscreen();
+
+            }    
+
         }
         else
         {
@@ -204,32 +210,32 @@ function main()
             {
                 document.msExitFullScreen();
             }
-        }
+        }     
     }
 
-    // stub functions
+    // Stub Function
     function initialize()
     {
-        // code
-        // get 2D context from canvas
+        // Code
+        // Get 2D context from canvas
         gl = canvas.getContext("webgl2");
         if (gl == null)
         {
-            console.log("WebGL2 Context element cannot be obtained.\n");   
+            console.log("Webgl2 Context element cant be optained");
         }
         else
         {
-            console.log("WebGL2 Context element succesfully obtained.\n");   
+            console.log("Webgl2 Context element succesfully obtained");
         }
 
-        // set viewport width and viewport height
+        // Set viewport width and viewport height
         gl.viewportWidth = canvas.width;
         gl.viewportHeight = canvas.height;
 
         // VERTEX SHADER
         // 1. Write shader source code
-        var vertexShaderSourceCode = 
-       "#version 300 es\n"+
+	    var vertexShaderSourceCode =         
+        "#version 300 es\n"+
         "in vec4 aPosition; \n" +
         "in vec3 aNormal;\n" +
         "uniform mat4 uModelMatrix;\n" +
@@ -277,7 +283,7 @@ function main()
         "}\n";
 
         // 2. Create the shader object
-        var vertexShaderObject = gl.createShader(gl.VERTEX_SHADER);
+        var vertexShaderObject = gl.createShader(gl.VERTEX_SHADER)
 
         // 3. Give the shader source code to the shader object
         gl.shaderSource(vertexShaderObject, vertexShaderSourceCode);
@@ -289,22 +295,23 @@ function main()
         if(gl.getShaderParameter(vertexShaderObject, gl.COMPILE_STATUS) == false)
         {
             var error = gl.getShaderInfoLog(vertexShaderObject);
-            if (error.length > 0)
+            if(error.length > 0)
             {
                 alert("Error: " + error);
-            }
+            }   
+            
             uninitialize();
         }
         else
         {
-            console.log("Vertex shader compilation successful\n");
+            console.log("Vertex shader compilation successfully");
         }
 
         // FRAGMENT SHADER
         // 1. Write shader source code
         var fragmentShaderSourceCode = 
         "#version 300 es\n"+
-        "precision highp float;\n" +
+        "precision highp float;"+
         "in vec3 out_Phong_ADS_Light;\n" +
         "out vec4 fragColor;\n" +
         "void main(void)\n" +
@@ -325,15 +332,16 @@ function main()
         if(gl.getShaderParameter(fragmentShaderObject, gl.COMPILE_STATUS) == false)
         {
             var error = gl.getShaderInfoLog(fragmentShaderObject);
-            if (error.length > 0)
+            if(error.length > 0)
             {
                 alert("Error: " + error);
-            }
+            }   
+            
             uninitialize();
         }
         else
         {
-            console.log("Fragment shader compilation successful\n");
+            console.log("Fragment shader compilation successfully");
         }
 
         // Create, attach, link shader program object
@@ -349,17 +357,18 @@ function main()
         if(gl.getProgramParameter(shaderProgramObject, gl.LINK_STATUS) == false)
         {
             var error = gl.getProgramInfoLog(shaderProgramObject);
-            if (error.length > 0)
+            if(error.length > 0)
             {
                 alert("Error: " + error);
-            }
+            }   
+            
             uninitialize();
         }
         else
         {
-            console.log("Shader linking successful\n");
+            console.log("Shader linking successfully");
         }
-        
+
         // Get the required uniform location from the shader
         modelMatrixUniform = gl.getUniformLocation(shaderProgramObject, "uModelMatrix");
         viewMatrixUniform = gl.getUniformLocation(shaderProgramObject, "uViewMatrix");
@@ -390,7 +399,6 @@ function main()
 
         // Provide vertex position, color, normal, texCoord etc.
         var pyramid_position = new Float32Array([
-            // front
             0.0,  1.0,  0.0, // front-top
             -1.0, -1.0,  1.0, // front-left
             1.0, -1.0,  1.0, // front-right
@@ -411,7 +419,6 @@ function main()
             -1.0, -1.0,  1.0, // left-right
         ]);
 
-        // normals for pyramid
         var pyramid_normal = new Float32Array([
             // front
             0.000000, 0.447214,  0.894427, // front-top
@@ -434,6 +441,7 @@ function main()
             -0.894427, 0.447214,  0.000000, // left-right
         ]);
 
+        // PYRAMID
         // VERTEX ARRAY OBJECT FOR ARRAYS OF VERTEX OBJECT
 	    vao_pyramid = gl.createVertexArray();
         // Bind vertex array object
@@ -455,23 +463,24 @@ function main()
         gl.enableVertexAttribArray(MyAttributes.AMC_ATTRIBUTE_NORMAL);
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
-        // unbind VAO_pyramid
+        // unbind VAO
 	    gl.bindVertexArray(null);
 
         // Depth related code
         gl.clearDepth(1.0);
         gl.enable(gl.DEPTH_TEST);
         gl.depthFunc(gl.LEQUAL);
-        
-        // Tell OpenGL to choose the color to clear the screen
+
+        // Clear color
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
-        
+
         perspectiveProjectionMatrix = mat4.create(); // this is similar to glLoadIdentity() in resize
     }
 
+
     function resize()
     {
-        // code 
+        // Code
         if(bFullscreen == true)
         {
             canvas.width = window.innerWidth;
@@ -488,36 +497,34 @@ function main()
         // do perspective projection
 	    perspectiveProjectionMatrix = mat4.perspective(perspectiveProjectionMatrix, 45.0, parseFloat(canvas.width)/parseFloat(canvas.height), 0.1, 100.0);
     }
-    
+
     function display()
     {
-        // code
+        // Code
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         // use shader program object
 	    gl.useProgram(shaderProgramObject);
 
         // Transformations
-        var modelMatrix = mat4.create();
-        var viewMatrix = mat4.create();
+        var modelMatrix = mat4.create(); // this is similar to glLoadIdentity() in display for model view matrix
+        var viewMatrix = mat4.create(); // this is similar to glLoadIdentity() in display for view matrix
         var translationMatrix = mat4.create();
-        mat4.translate(translationMatrix, translationMatrix, [0.0, 0.0, -3.0]); // translate cube backwards
+        mat4.translate(translationMatrix, translationMatrix, [0.0, 0.0, -5.0]); //translate triangle backwards
         var scaleMatrix = mat4.create();
-        mat4.scale(scaleMatrix, scaleMatrix, [0.75, 0.75, 0.75]); // scale down to 75%
+        mat4.scale(scaleMatrix, scaleMatrix, [0.75, 0.75, 0.75]);
         var rotationMatrix = mat4.create();
-        mat4.rotateY(rotationMatrix, rotationMatrix, Math.PI * anglePyramid / 180.0); // rotate about Y axis
+        mat4.rotateY(rotationMatrix, rotationMatrix, Math.PI/180 * anglePyramid);
 
-        // modelMatrix = translationMatrix * scaleMatrix * rotationMatrix;
         mat4.multiply(modelMatrix, translationMatrix, scaleMatrix);
         mat4.multiply(modelMatrix, modelMatrix, rotationMatrix);
-        
-        // send above matrix to the shader in "uniform"
-        // gl.uniformMatrix4fv(mvpMatrixUniform, gl.FALSE, modelViewProjectionMatrix);
-        gl.uniformMatrix4fv(modelMatrixUniform, false, modelMatrix);
-        gl.uniformMatrix4fv(viewMatrixUniform, false, viewMatrix);
-        gl.uniformMatrix4fv(projectionMatrixUniform, false, perspectiveProjectionMatrix);
 
-        if (bLight == true)
+        // send above matrix to the shader in "uniform"
+	    gl.uniformMatrix4fv(modelMatrixUniform, gl.FALSE, modelMatrix);
+        gl.uniformMatrix4fv(viewMatrixUniform, gl.FALSE, viewMatrix);
+	    gl.uniformMatrix4fv(projectionMatrixUniform, gl.FALSE, perspectiveProjectionMatrix);
+
+        if(bLight == true)
         {
             gl.uniform3fv(laUniform[0], light[0].ambient.slice(0, 3));
             gl.uniform3fv(ldUniform[0], light[0].diffuse.slice(0, 3));
@@ -529,10 +536,10 @@ function main()
             gl.uniform3fv(lsUniform[1], light[1].specular.slice(0, 3));
             gl.uniform4fv(lightPositionUniform[1], light[1].position);
 
-            gl.uniform3fv(kaUniform, materialAmbient); // material ambient reflectance
-            gl.uniform3fv(kdUniform, materialDiffuse); // material diffuse reflectance
-            gl.uniform3fv(ksUniform, materialSpecular); // material specular reflectance
-            gl.uniform1f(materialShininessUniform, materialShininess); // material shininess
+            gl.uniform3fv(kaUniform, materialAmbient);
+            gl.uniform3fv(kdUniform, materialDiffuse);
+            gl.uniform3fv(ksUniform, materialSpecular);
+            gl.uniform1f(materialShininessUniform, materialShininess);
             gl.uniform1i(lKeyPressedUniform, 1);
         }
         else
@@ -540,31 +547,29 @@ function main()
             gl.uniform1i(lKeyPressedUniform, 0);
         }
 
-        // Bind with VAO_pyramid
+        // Bind with VAO
         gl.bindVertexArray(vao_pyramid);
 
         // Draw the vertex arrays
-        gl.drawArrays(gl.TRIANGLES, 0, 12);
-
-        // Unbind with VAO_pyramid
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, 12);
+        
+        // Unbind with VAO
         gl.bindVertexArray(null);
 
         // unuse shader program object
-        gl.useProgram(null);
-
-        // call update
+	    gl.useProgram(null);
+        
+        // Update call
         update();
 
-        // double buffering
-        request_animation_frame(display, canvas);  // here the game loop is maintained via recursion
+        // Double buffering
+        request_animation_frame(display, canvas);
     }
 
     function update()
     {
-        // code
-        // rotation
-        anglePyramid = anglePyramid + 0.1;
-        
+        // Code
+        anglePyramid = anglePyramid + 0.01;
         if(anglePyramid >= 360.0)
         {
             anglePyramid = anglePyramid - 360.0;
@@ -573,49 +578,45 @@ function main()
 
     function uninitialize()
     {
-        // code
-        if (bFullscreen == true) 
+        // Code
+        if(bFullscreen == true)
         {
             toggleFullscreen();
-        }
-
-        if (vbo_position_pyramid)
+        } 
+        
+        if(vbo_position_pyramid)
         {
-            gl.deleteBuffer(vbo_position_pyramid);
+            gl.deleteBuffer(vao_position);
             vbo_position_pyramid = null;
-        }
-
-        if (vbo_color_pyramid)
+        } 
+        
+        if(vbo_normal_pyramid)
         {
-            gl.deleteBuffer(vbo_color_pyramid);
-            vbo_color_pyramid = null;
-        }
-
-        if (vbo_normal_pyramid)
-        {
-            gl.deleteBuffer(vbo_normal_pyramid);
+            gl.deleteBuffer(vao_normal);
             vbo_normal_pyramid = null;
         }
 
-        if (vao_pyramid)
+        if(vao_pyramid)
         {
             gl.deleteVertexArray(vao_pyramid);
             vao_pyramid = null;
         }
 
-        if (shaderProgramObject)
+        if(shaderProgramObject)
         {
             gl.useProgram(shaderProgramObject);
             var shaderObjects = gl.getAttachedShaders(shaderProgramObject);
-            for (let i = 0; i < shaderObjects.length; i++)
+            for(let i = 0; i < shaderObjects.length; i++)
             {
                 gl.detachShader(shaderProgramObject, shaderObjects[i]);
                 gl.deleteShader(shaderObjects[i]);
-                shaderObjects[i] = null; 
-            }
+                shaderObjects[i] = null;
+            } 
             gl.useProgram(null);
             gl.deleteProgram(shaderProgramObject);
-            shaderProgramObject = null;
-        }
+            shaderProgramObject = null;  
+        }    
     }
 }
+
+

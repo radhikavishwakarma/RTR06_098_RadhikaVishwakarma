@@ -1,0 +1,12 @@
+PROGRAM STARTED SUCCESSFULLY !!
+
+Feature Level 11.0 is aquired
+Vertex Shader Compilation Succeeded. 
+ID3D11Device::CreateVertexShader() Succeeded. 
+Pixel Shader Compilation Succeeded. 
+ID3D11Device::CreatePixelShader() Succeeded. 
+ID3D11Device::CreateInputLayout() Succeeded.
+ID3D11Device::CreateBuffer() Succeeded for Position Buffer.
+ID3D11Device::CreateBuffer() Succeeded for Constant Buffer.
+ID3D11Device::CreateRasterizerState() Succeeded.
+CreateDXGIFactory() SUCCEDED for 0

@@ -6,14 +6,14 @@ var canvas_original_height;
 var request_animation_frame = window.requestAnimationFrame ||
                                 window.mozRequestAnimationFrame ||
                                 window.oRequestAnimationFrame ||
-                                window.webkitRequestAnimationFrame ||
+                                window.webKitRequestAnimationFrame ||
                                 window.msRequestAnimationFrame;
 
 // WebGL related variables
 const MyAttributes = {
     AMC_ATTRIBUTE_POSITION : 0,
     AMC_ATTRIBUTE_COLOR : 1,
-    AMC_ATTRIBUTE_NORMAL : 2,
+	AMC_ATTRIBUTE_NORMAL : 2,
 };
 
 var shaderProgramObject = null;
@@ -24,34 +24,34 @@ var modelMatrixUniform;
 var viewMatrixUniform;
 var projectionMatrixUniform;
 
-var angleSphere = 0.0;
+var perspectiveProjectionMatrix;
 
-var lightAngle0 = 0.0; // for first light
-var lightAngle1 = 0.0; // for second light
-var lightAngle2 = 0.0; // for third light
-
-// Parameters to be passed as uniform to shaders for light calculations
+// parameters to be passed to the shader 
 var laUniform = new Array(3);
 var ldUniform = new Array(3);
 var lsUniform = new Array(3);
 var kaUniform = 0;
 var kdUniform = 0;
 var ksUniform = 0;
-var lightPositionUniform = new Array(3);
 var materialShininessUniform = 0;
-
+var lightPositionUniform = new Array(3);
 var lKeyPressedUniform = 0;
-var perspectiveProjectionMatrix;
+
+// rotation angles
+var angleSphere = 0.0;
+
+var lightAngle0 = 0.0;
+var lightAngle1 = 0.0;
+var lightAngle2 = 0.0;
 
 var bAnimation = false;
 var bLight = false;
 
-
-
-/// Lights related variable
-class Light {
-    constructor() {
-        this.ambient = [0.0, 0.0, 0.0, 1.0];  // Equivalent to vec4
+class Light
+{
+    constructor()
+    {
+        this.ambient = [0.0, 0.0, 0.0, 1.0];
         this.diffuse = [0.0, 0.0, 0.0, 1.0];
         this.specular = [0.0, 0.0, 0.0, 1.0];
         this.position = [0.0, 0.0, 0.0, 1.0];
@@ -59,82 +59,85 @@ class Light {
 }
 
 const light = [
-    new Light(), // light[0]
-    new Light(),  // light[1]
-    new Light()  // light[2]
+    new Light(), // light[0] is for light 1
+    new Light(), // light[1] is for light 2
+    new Light()  // light[2] is for light 3
 ];
 
 var materialAmbient = [0.0, 0.0, 0.0];
-var materialDiffuse = [0.5, 0.2, 0.7];
-var materialSpecular = [0.7, 0.7, 0.7];
-var materialShininess = 50.0;
+var materialDiffuse = [1.0, 1.0, 1.0];
+var materialSpecular = [1.0, 1.0, 1.0];
+var materialShininess = 128.0;
+
+
 
 function main()
 {
-    // get canvas
+    // Get canvas
     canvas = document.getElementById("AMC")
     if (canvas == null)
     {
-        console.log("Canvas element cannot be obtained.\n");   
+        console.log("canvas element cant be optained");
     }
-    else
-    {
-        console.log("Canvas element succesfully obtained.\n");   
+    else{
+        console.log("canvas element succesfully obtained");
+
     }
 
     canvas_original_width = canvas.width;
     canvas_original_height = canvas.height;
-
-    // register our callback functions as event listeners
+    
+    // Register our callback fuction as event listeners
     window.addEventListener("keydown", keyDown, false);
     window.addEventListener("click", mouseDown, false);
     window.addEventListener("resize", resize, false);
 
-    // initialize
+    // Initialize
     initialize();
 
-    // resize
+    // Resize
     resize();
 
-    // display
+    // Display
     display();
 
     function keyDown(event)
     {
         // code
-        // alert("Key is pressed!!\n");
-        switch (event.keyCode)
+        switch(event.keyCode)
         {
-            case 65:  // A or a key
+            case 65:
             case 97:
-                if (bAnimation == false)
+                // A or a key
+                if(bAnimation == false)
                 {
                     bAnimation = true;
-                    console.log("Animation started\n");
+                    console.log("Animation started");
                 }
                 else
                 {
                     bAnimation = false;
-                    console.log("Animation stopped\n");
+                    console.log("Animation stopped");
                 }
                 break;
-            case 76:  // L or l key
+            case 76:
             case 108:
-                if (bLight == false)
+                // L or l key
+                if(bLight == false)
                 {
                     bLight = true;
-                    console.log("Lighting enabled\n");
+                    console.log("Light is ON");
                 }
                 else
                 {
                     bLight = false;
-                    console.log("Lighting disabled\n");
+                    console.log("Light is OFF");
                 }
                 break;
             case 70:
             case 102:
                 if (bFullscreen == false)
-                { 
+                {
                     toggleFullscreen();
                     bFullscreen = true;  
                 }
@@ -143,50 +146,54 @@ function main()
                     toggleFullscreen();
                     bFullscreen = false;
                 }
-                break;
-            case 69:  // E for exit
+                break; 
+            case 69:
                 uninitialize();
                 window.close();
                 break;
             default:
-                break;
+                break;     
         }
     }
 
     function mouseDown()
     {
-        // code 
-        // alert("Mouse is clicked!!\n");
+        // code
     }
 
     function toggleFullscreen()
     {
         // code
         var fullscreen_element = 
-        document.fullscreenElement || 
-        document.mozFullScreenElement || 
-        document.webkitFullscreenElement || 
-        document.msFullscreenElement || 
+        document.fullscreenElement ||
+        document.mozFullScreenElement ||
+        document.webkitFullscreenElement ||
+        document.msFullscreenElement ||
         null;
 
         if (fullscreen_element == null)
-        {   
-            if(canvas.requestFullscreen)
+        {
+            if (canvas.requestFullscreen)
             {
                 canvas.requestFullscreen();
+
             }
-            else if(canvas.mozRequestFullScreen)
+            else if (canvas.mozRequestFullScreen)
             {
                 canvas.mozRequestFullScreen();
-            }
-            else if(canvas.webkitRequestFullScreen)
+
+            }    
+            else if (canvas.webkitReuestFullscreen)
             {
-                canvas.webkitRequestFullScreen();
-            }
-            else if(canvas.msRequestFullScreen)
+                canvas.webkitReuestFullscreen();
+
+            }    
+            else if (canvas.msReuestFullscreen)
             {
-                canvas.msRequestFullScreen();
-            }
+                canvas.msReuestFullscreen();
+
+            }    
+
         }
         else
         {
@@ -206,31 +213,31 @@ function main()
             {
                 document.msExitFullScreen();
             }
-        }
+        }     
     }
 
-    // stub functions
+    // Stub Function
     function initialize()
     {
-        // code
-        // get 2D context from canvas
+        // Code
+        // Get 2D context from canvas
         gl = canvas.getContext("webgl2");
         if (gl == null)
         {
-            console.log("WebGL2 Context element cannot be obtained.\n");   
+            console.log("Webgl2 Context element cant be optained");
         }
         else
         {
-            console.log("WebGL2 Context element succesfully obtained.\n");   
+            console.log("Webgl2 Context element succesfully obtained");
         }
 
-        // set viewport width and viewport height
+        // Set viewport width and viewport height
         gl.viewportWidth = canvas.width;
         gl.viewportHeight = canvas.height;
 
         // VERTEX SHADER
         // 1. Write shader source code
-        var vertexShaderSourceCode = 
+	    var vertexShaderSourceCode =         
         "#version 300 es\n"+
         "in vec4 aPosition; \n" +
         "in vec3 aNormal;\n" +
@@ -279,7 +286,7 @@ function main()
         "}\n";
 
         // 2. Create the shader object
-        var vertexShaderObject = gl.createShader(gl.VERTEX_SHADER);
+        var vertexShaderObject = gl.createShader(gl.VERTEX_SHADER)
 
         // 3. Give the shader source code to the shader object
         gl.shaderSource(vertexShaderObject, vertexShaderSourceCode);
@@ -291,22 +298,23 @@ function main()
         if(gl.getShaderParameter(vertexShaderObject, gl.COMPILE_STATUS) == false)
         {
             var error = gl.getShaderInfoLog(vertexShaderObject);
-            if (error.length > 0)
+            if(error.length > 0)
             {
                 alert("Error: " + error);
-            }
+            }   
+            
             uninitialize();
         }
         else
         {
-            console.log("Vertex shader compilation successful\n");
+            console.log("Vertex shader compilation successfully");
         }
 
         // FRAGMENT SHADER
         // 1. Write shader source code
         var fragmentShaderSourceCode = 
         "#version 300 es\n"+
-        "precision highp float;\n" +
+        "precision highp float;"+
         "in vec3 out_Phong_ADS_Light;\n" +
         "out vec4 fragColor;\n" +
         "void main(void)\n" +
@@ -327,15 +335,16 @@ function main()
         if(gl.getShaderParameter(fragmentShaderObject, gl.COMPILE_STATUS) == false)
         {
             var error = gl.getShaderInfoLog(fragmentShaderObject);
-            if (error.length > 0)
+            if(error.length > 0)
             {
                 alert("Error: " + error);
-            }
+            }   
+            
             uninitialize();
         }
         else
         {
-            console.log("Fragment shader compilation successful\n");
+            console.log("Fragment shader compilation successfully");
         }
 
         // Create, attach, link shader program object
@@ -351,17 +360,18 @@ function main()
         if(gl.getProgramParameter(shaderProgramObject, gl.LINK_STATUS) == false)
         {
             var error = gl.getProgramInfoLog(shaderProgramObject);
-            if (error.length > 0)
+            if(error.length > 0)
             {
                 alert("Error: " + error);
-            }
+            }   
+            
             uninitialize();
         }
         else
         {
-            console.log("Shader linking successful\n");
+            console.log("Shader linking successfully");
         }
-        
+
         // Get the required uniform location from the shader
         modelMatrixUniform = gl.getUniformLocation(shaderProgramObject, "uModelMatrix");
         viewMatrixUniform = gl.getUniformLocation(shaderProgramObject, "uViewMatrix");
@@ -388,15 +398,12 @@ function main()
         light[0].ambient = [0.0, 0.0, 0.0, 1.0];
         light[0].diffuse = [1.0, 0.0, 0.0, 1.0];
         light[0].specular = [1.0, 0.0, 0.0, 1.0];
-        // light[0].position = [-2.0, 0.0, 0.0, 1.0];
         light[1].ambient = [0.0, 0.0, 0.0, 1.0];
         light[1].diffuse = [0.0, 1.0, 0.0, 1.0];
         light[1].specular = [0.0, 1.0, 0.0, 1.0];
-        // light[1].position = [2.0, 0.0, 0.0, 1.0];
         light[2].ambient = [0.0, 0.0, 0.0, 1.0];
         light[2].diffuse = [0.0, 0.0, 1.0, 1.0];
         light[2].specular = [0.0, 0.0, 1.0, 1.0];
-        // light[2].position = [0.0, 2.0, 0.0, 1.0];
 
         // Provide vertex position, color, normal, texCoord etc.
         sphere = new Mesh();
@@ -406,16 +413,16 @@ function main()
         gl.clearDepth(1.0);
         gl.enable(gl.DEPTH_TEST);
         gl.depthFunc(gl.LEQUAL);
-        
-        // Tell OpenGL to choose the color to clear the screen
+
+        // Clear color
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
-        
+
         perspectiveProjectionMatrix = mat4.create(); // this is similar to glLoadIdentity() in resize
     }
 
     function resize()
     {
-        // code 
+        // Code
         if(bFullscreen == true)
         {
             canvas.width = window.innerWidth;
@@ -432,42 +439,41 @@ function main()
         // do perspective projection
 	    perspectiveProjectionMatrix = mat4.perspective(perspectiveProjectionMatrix, 45.0, parseFloat(canvas.width)/parseFloat(canvas.height), 0.1, 100.0);
     }
-    
+
     function display()
     {
-        // code
+        // Code
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         // use shader program object
 	    gl.useProgram(shaderProgramObject);
 
         // Transformations
-        var modelMatrix = mat4.create();
-        var viewMatrix = mat4.create();
+        var modelMatrix = mat4.create(); // this is similar to glLoadIdentity() in display for model view matrix
+        var viewMatrix = mat4.create(); // this is similar to glLoadIdentity() in display for view matrix
         var translationMatrix = mat4.create();
-        mat4.translate(translationMatrix, translationMatrix, [0.0, 0.0, -6.0]); // translate cube backwards
+        mat4.translate(translationMatrix, translationMatrix, [0.0, 0.0, -5.0]); //translate triangle backwards
         var scaleMatrix = mat4.create();
-        mat4.scale(scaleMatrix, scaleMatrix, [0.75, 0.75, 0.75]); // scale down to 75%
+        mat4.scale(scaleMatrix, scaleMatrix, [0.75, 0.75, 0.75]);
         var rotationMatrix = mat4.create();
-        mat4.rotateY(rotationMatrix, rotationMatrix, Math.PI * angleSphere / 180.0); // rotate about Y axis
+        mat4.rotateY(rotationMatrix, rotationMatrix, Math.PI/180 * angleSphere);
 
-        // modelMatrix = translationMatrix * scaleMatrix * rotationMatrix;
         mat4.multiply(modelMatrix, translationMatrix, scaleMatrix);
         mat4.multiply(modelMatrix, modelMatrix, rotationMatrix);
-        
+
         // send above matrix to the shader in "uniform"
-        // gl.uniformMatrix4fv(mvpMatrixUniform, gl.FALSE, modelViewProjectionMatrix);
-        gl.uniformMatrix4fv(modelMatrixUniform, false, modelMatrix);
-        gl.uniformMatrix4fv(viewMatrixUniform, false, viewMatrix);
-        gl.uniformMatrix4fv(projectionMatrixUniform, false, perspectiveProjectionMatrix);
+	    gl.uniformMatrix4fv(modelMatrixUniform, gl.FALSE, modelMatrix);
+        gl.uniformMatrix4fv(viewMatrixUniform, gl.FALSE, viewMatrix);
+	    gl.uniformMatrix4fv(projectionMatrixUniform, gl.FALSE, perspectiveProjectionMatrix);
 
         var radius = 3.0;
-        if (bLight == true)
+
+        if(bLight == true)
         {
             light[0].position = [0.0, radius * Math.sin(Math.PI/180.0 * lightAngle0), radius * Math.cos(Math.PI/180.0 * lightAngle0), 1.0];
             light[1].position = [radius * Math.sin(Math.PI/180.0 * lightAngle1), 0.0, radius * Math.cos(Math.PI/180.0 * lightAngle1), 1.0];
             light[2].position = [radius * Math.cos(Math.PI/180.0 * lightAngle2), radius * Math.sin(Math.PI/180.0 * lightAngle2), 0.0, 1.0];
-            
+
             gl.uniform3fv(laUniform[0], light[0].ambient.slice(0, 3));
             gl.uniform3fv(ldUniform[0], light[0].diffuse.slice(0, 3));
             gl.uniform3fv(lsUniform[0], light[0].specular.slice(0, 3));
@@ -483,10 +489,10 @@ function main()
             gl.uniform3fv(lsUniform[2], light[2].specular.slice(0, 3));
             gl.uniform4fv(lightPositionUniform[2], light[2].position);
 
-            gl.uniform3fv(kaUniform, materialAmbient); // material ambient reflectance
-            gl.uniform3fv(kdUniform, materialDiffuse); // material diffuse reflectance
-            gl.uniform3fv(ksUniform, materialSpecular); // material specular reflectance
-            gl.uniform1f(materialShininessUniform, materialShininess); // material shininess
+            gl.uniform3fv(kaUniform, materialAmbient);
+            gl.uniform3fv(kdUniform, materialDiffuse);
+            gl.uniform3fv(ksUniform, materialSpecular);
+            gl.uniform1f(materialShininessUniform, materialShininess);
             gl.uniform1i(lKeyPressedUniform, 1);
         }
         else
@@ -494,34 +500,34 @@ function main()
             gl.uniform1i(lKeyPressedUniform, 0);
         }
 
-        // Draw Sphere
+        // Draw sphere
         sphere.draw();
-
+        
         // unuse shader program object
-        gl.useProgram(null);
-
-        // call update
+	    gl.useProgram(null);
+        
+        // Update call
         update();
 
-        // double buffering
-        request_animation_frame(display, canvas);  // here the game loop is maintained via recursion
+        // Double buffering
+        request_animation_frame(display, canvas);
     }
 
     function update()
     {
-        // code
-        // rotation
+        // Code
+        // update red light position
         lightAngle0 += 0.2;
         if(lightAngle0 >= 360.0)
         {
-            lightAngle0 = lightAngle0 - 360.;
+            lightAngle0 = lightAngle0 - 360.0;
         }
 
         // update green light position
         lightAngle1 += 0.2;
         if(lightAngle1 >= 360.0)
         {
-            lightAngle1 = lightAngle1 - 360.;
+            lightAngle1 = lightAngle1 - 360.0;
         }
 
         // update blue light position
@@ -534,31 +540,33 @@ function main()
 
     function uninitialize()
     {
-        // code
-        if (bFullscreen == true) 
+        // Code
+        if(bFullscreen == true)
         {
             toggleFullscreen();
-        }
-
+        } 
+        
         if (sphere)
 		{
 			sphere.deallocate();
 			sphere = null;
 		}
 
-        if (shaderProgramObject)
+        if(shaderProgramObject)
         {
             gl.useProgram(shaderProgramObject);
             var shaderObjects = gl.getAttachedShaders(shaderProgramObject);
-            for (let i = 0; i < shaderObjects.length; i++)
+            for(let i = 0; i < shaderObjects.length; i++)
             {
                 gl.detachShader(shaderProgramObject, shaderObjects[i]);
                 gl.deleteShader(shaderObjects[i]);
-                shaderObjects[i] = null; 
-            }
+                shaderObjects[i] = null;
+            } 
             gl.useProgram(null);
             gl.deleteProgram(shaderProgramObject);
-            shaderProgramObject = null;
-        }
+            shaderProgramObject = null;  
+        }    
     }
 }
+
+

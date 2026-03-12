@@ -21,10 +21,6 @@ var shaderProgramObject_pf = null;
 
 var sphere = null;
 
-var lightAngle0 = 0.0; // for first light
-var lightAngle1 = 0.0; // for second light
-var lightAngle2 = 0.0; // for third light
-
 var modelMatrixUniform_pv;
 var viewMatrixUniform_pv;
 var projectionMatrixUniform_pv;
@@ -32,7 +28,17 @@ var modelMatrixUniform_pf;
 var viewMatrixUniform_pf;
 var projectionMatrixUniform_pf;
 
+// Rotation angles
 var angleSphere = 0.0;
+
+var lightAngle0 = 0.0;
+var lightAngle1 = 0.0;
+var lightAngle2 = 0.0;
+
+var sphere_vertices = new Float32Array(1146);
+var sphere_normals = new Float32Array(1146);
+var sphere_textures = new Float32Array(764);
+var sphere_elements = new Uint16Array(2280);
 
 // Parameters to be passed as uniform to shaders for light calculations
 var laUniform_pv = new Array(3);
@@ -75,7 +81,7 @@ class Light {
 const light = [
     new Light(), // light[0]
     new Light(),  // light[1]
-    new Light()  // light[2]
+    new Light()   // light[2]
 ];
 
 var materialAmbient = [0.0, 0.0, 0.0];
@@ -397,12 +403,13 @@ function main()
         ksUniform_pv = gl.getUniformLocation(shaderProgramObject_pv, "uKs");
         materialShininessUniform_pv = gl.getUniformLocation(shaderProgramObject_pv, "uMaterialShininess");
         lKeyPressedUniform_pv = gl.getUniformLocation(shaderProgramObject_pv, "uLKeyIsPressed");
+
         // -----------------------------------------------------------
         // VERTEX SHADER PER-FRAGMENT
         // 1. Write shader source code
         var vertexShaderSourceCode_pf = 
-        "#version 300 es\n"+
-        "in vec4 aPosition;\n" +
+       "#version 300 es\n"+
+        "in vec4 aPosition; \n" +
         "in vec3 aNormal;\n" +
         "uniform mat4 uModelMatrix;\n" +
         "uniform mat4 uViewMatrix;\n" +
@@ -574,15 +581,12 @@ function main()
         light[0].ambient = [0.0, 0.0, 0.0, 1.0];
         light[0].diffuse = [1.0, 0.0, 0.0, 1.0];
         light[0].specular = [1.0, 0.0, 0.0, 1.0];
-        // light[0].position = [-2.0, 0.0, 0.0, 1.0];
         light[1].ambient = [0.0, 0.0, 0.0, 1.0];
         light[1].diffuse = [0.0, 1.0, 0.0, 1.0];
         light[1].specular = [0.0, 1.0, 0.0, 1.0];
-        // light[1].position = [2.0, 0.0, 0.0, 1.0];
         light[2].ambient = [0.0, 0.0, 0.0, 1.0];
         light[2].diffuse = [0.0, 0.0, 1.0, 1.0];
         light[2].specular = [0.0, 0.0, 1.0, 1.0];
-        // light[2].position = [0.0, 2.0, 0.0, 1.0];
 
         // Provide vertex position, color, normal, texCoord etc.
         sphere = new Mesh();
@@ -640,6 +644,10 @@ function main()
 
         var radius = 3.0;
 
+        light[0].position = [0.0, radius * Math.sin(Math.PI/180.0 * lightAngle0), radius * Math.cos(Math.PI/180.0 * lightAngle0), 1.0];
+        light[1].position = [radius * Math.sin(Math.PI/180.0 * lightAngle1), 0.0, radius * Math.cos(Math.PI/180.0 * lightAngle1), 1.0];
+        light[2].position = [radius * Math.cos(Math.PI/180.0 * lightAngle2), radius * Math.sin(Math.PI/180.0 * lightAngle2), 0.0, 1.0];
+
         // use shader program object
         if((bPerVertex == true) && (bPerFragment == false))
         {
@@ -650,24 +658,23 @@ function main()
             gl.uniformMatrix4fv(viewMatrixUniform_pv, false, viewMatrix);
             gl.uniformMatrix4fv(projectionMatrixUniform_pv, false, perspectiveProjectionMatrix);
 
-            if (bLight == true)
+            if(bLight == true)
             {
-                light[0].position = [0.0, radius * Math.sin(Math.PI/180.0 * lightAngle0), radius * Math.cos(Math.PI/180.0 * lightAngle0), 1.0];
-                light[1].position = [radius * Math.sin(Math.PI/180.0 * lightAngle1), 0.0, radius * Math.cos(Math.PI/180.0 * lightAngle1), 1.0];
-                light[2].position = [radius * Math.cos(Math.PI/180.0 * lightAngle2), radius * Math.sin(Math.PI/180.0 * lightAngle2), 0.0, 1.0];
-                
                 gl.uniform3fv(laUniform_pv[0], light[0].ambient.slice(0,3));
                 gl.uniform3fv(ldUniform_pv[0], light[0].diffuse.slice(0,3));
                 gl.uniform3fv(lsUniform_pv[0], light[0].specular.slice(0,3));
                 gl.uniform4fv(lightPositionUniform_pv[0], light[0].position);
+
                 gl.uniform3fv(laUniform_pv[1], light[1].ambient.slice(0,3));
                 gl.uniform3fv(ldUniform_pv[1], light[1].diffuse.slice(0,3));
                 gl.uniform3fv(lsUniform_pv[1], light[1].specular.slice(0,3));
                 gl.uniform4fv(lightPositionUniform_pv[1], light[1].position);
+
                 gl.uniform3fv(laUniform_pv[2], light[2].ambient.slice(0,3));
                 gl.uniform3fv(ldUniform_pv[2], light[2].diffuse.slice(0,3));
                 gl.uniform3fv(lsUniform_pv[2], light[2].specular.slice(0,3));
                 gl.uniform4fv(lightPositionUniform_pv[2], light[2].position);
+
                 gl.uniform3fv(kaUniform_pv, materialAmbient); // material ambient reflectance
                 gl.uniform3fv(kdUniform_pv, materialDiffuse); // material diffuse reflectance
                 gl.uniform3fv(ksUniform_pv, materialSpecular); // material specular reflectance
@@ -690,22 +697,21 @@ function main()
 
             if (bLight == true)
             {
-                light[0].position = [0.0, radius * Math.sin(Math.PI/180.0 * lightAngle0), radius * Math.cos(Math.PI/180.0 * lightAngle0), 1.0];
-                light[1].position = [radius * Math.sin(Math.PI/180.0 * lightAngle1), 0.0, radius * Math.cos(Math.PI/180.0 * lightAngle1), 1.0];
-                light[2].position = [radius * Math.cos(Math.PI/180.0 * lightAngle2), radius * Math.sin(Math.PI/180.0 * lightAngle2), 0.0, 1.0];
-                
                 gl.uniform3fv(laUniform_pf[0], light[0].ambient.slice(0,3));
                 gl.uniform3fv(ldUniform_pf[0], light[0].diffuse.slice(0,3));
                 gl.uniform3fv(lsUniform_pf[0], light[0].specular.slice(0,3));
                 gl.uniform4fv(lightPositionUniform_pf[0], light[0].position);
+
                 gl.uniform3fv(laUniform_pf[1], light[1].ambient.slice(0,3));
                 gl.uniform3fv(ldUniform_pf[1], light[1].diffuse.slice(0,3));
                 gl.uniform3fv(lsUniform_pf[1], light[1].specular.slice(0,3));
                 gl.uniform4fv(lightPositionUniform_pf[1], light[1].position);
+
                 gl.uniform3fv(laUniform_pf[2], light[2].ambient.slice(0,3));
                 gl.uniform3fv(ldUniform_pf[2], light[2].diffuse.slice(0,3));
                 gl.uniform3fv(lsUniform_pf[2], light[2].specular.slice(0,3));
                 gl.uniform4fv(lightPositionUniform_pf[2], light[2].position);
+
                 gl.uniform3fv(kaUniform_pf, materialAmbient); // material ambient reflectance
                 gl.uniform3fv(kdUniform_pf, materialDiffuse); // material diffuse reflectance
                 gl.uniform3fv(ksUniform_pf, materialSpecular); // material specular reflectance
@@ -734,18 +740,18 @@ function main()
     function update()
     {
         // code
-        // rotation
+        // update red light position
         lightAngle0 += 0.2;
         if(lightAngle0 >= 360.0)
         {
-            lightAngle0 = lightAngle0 - 360.;
+            lightAngle0 = lightAngle0 - 360.0;
         }
 
         // update green light position
         lightAngle1 += 0.2;
         if(lightAngle1 >= 360.0)
         {
-            lightAngle1 = lightAngle1 - 360.;
+            lightAngle1 = lightAngle1 - 360.0;
         }
 
         // update blue light position

@@ -1,0 +1,1 @@
+cl.exe /EHsc PrintDXInfo.cpp

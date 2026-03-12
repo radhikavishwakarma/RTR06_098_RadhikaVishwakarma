@@ -1,0 +1,16 @@
+PROGRAM STARTED SUCCESSFULLY !!
+
+Feature Level 11.0 is aquired
+Vertex Shader Compilation Succeeded 
+ID3D11Device::CreateVertexShader() Succeeded for 0
+Pixel Shader Compilation Succeeded 
+ID3D11Device::CreatePixelShader() Succeeded for 0
+ID3D11Device::CreateInputLayout() Succeeded 0
+ID3D11Device::CreateBuffer() Succeeded for Position Buffer 0
+ID3D11Device::CreateBuffer() Succeeded for Texture Buffer 0
+ID3D11Device::CreateBuffer() Succeeded for Constant Buffer 0
+ID3D11Device::CreateRasterizerState() Succeeded 0
+DirectX::CreateWICTextureFromFile() Succeeded for
+LoadD3DTexture() Succeeded for Stone.bmp with error code 0
+ID3D11Device::CreateSamplerState() Succeeded with error code 0
+CreateDXGIFactory() SUCCEDED for 0
