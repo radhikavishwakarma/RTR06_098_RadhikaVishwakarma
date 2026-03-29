@@ -1,0 +1,11 @@
+Program Started Successfully!
+
+ OPENGL INFORMATION 
+*************************************************
+OpenGL Vender   : Apple 
+OpenGL Renderer : Apple M1 Max 
+OpenGL Version  : 4.1 Metal - 88.1 
+GLSL   Version  : 4.10 
+*************************************************
+
+Program Terminated Successfully
