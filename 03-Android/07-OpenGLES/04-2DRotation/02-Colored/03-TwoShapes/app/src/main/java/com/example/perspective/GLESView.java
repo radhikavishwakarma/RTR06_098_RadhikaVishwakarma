@@ -1,0 +1,565 @@
+package com.example.perspective;
+
+import android.content.Context;
+// OpenGLES related packages
+import android.opengl.GLES32;
+import android.opengl.GLSurfaceView;
+import javax.microedition.khronos.opengles.GL10;
+import javax.microedition.khronos.egl.EGLConfig;
+
+
+// event packages
+import android.opengl.Matrix;
+import android.view.MotionEvent;
+import android.view.GestureDetector;
+import android.view.GestureDetector.OnGestureListener;
+import android.view.GestureDetector.OnDoubleTapListener;
+
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.FloatBuffer;
+
+
+public class GLESView extends GLSurfaceView implements GLSurfaceView.Renderer, OnGestureListener, OnDoubleTapListener{
+
+    private Context context;
+    private GestureDetector gestureDetector;
+
+    // Shader related global variables
+    private int shaderProgramObject = 0;
+
+    private int vao_triangle[] = new int[1];
+    private int vao_rectangle[] = new int[1];
+    private int vbo_position_triangle[] = new int[1];
+    private int vbo_position_rectangle[] = new int[1];
+    private int vbo_color_triangle[] = new int[1];
+    private int vbo_color_rectangle[] = new int[1];
+
+    // rotation angles
+    float angleTriangle = 0.0f;
+    float angleRectangle = 0.0f;
+
+    private int mvpMatrixUniform = 0;
+    private float perspectiveProjectionMatrix[] = new float[16];
+
+    public GLESView(Context _context)
+    {
+        super(_context);
+
+        // Initialize of OpenGLES
+        setEGLContextClientVersion(3);
+        setRenderer(this);
+        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+
+        // Get gesture Detector
+        gestureDetector = new GestureDetector(_context, this, null, false);
+
+        // set this class as double tap listener
+        gestureDetector.setOnDoubleTapListener(this);
+    }
+
+    // 3 implementable methods of GLsurfaceView.Renderer interface
+    @Override
+    public void onSurfaceCreated(GL10 gl, EGLConfig config)
+    {
+        // Code - similar to initialize
+        int iResult = initialize(gl);
+        if (iResult != 0)
+        {
+            System.out.println("AMC: initialize failed");
+            System.exit(0);
+        }
+    }
+
+    @Override
+    public void onSurfaceChanged(GL10 gl, int width, int height)
+    {
+        // Code - similar to resize
+        resize(width, height);
+    }
+
+    @Override
+    public void onDrawFrame(GL10 gl)
+    {
+        // Code - similar to display
+        display();
+        update();
+    }
+
+    // Implement one method from voew
+    @Override
+    public boolean onTouchEvent(MotionEvent e)
+    {
+        if (!gestureDetector.onTouchEvent(e))
+        {
+            super.onTouchEvent(e);
+        }
+        return true;
+    }
+
+//    Three method from on double tap listener
+    @Override
+    public boolean onDoubleTap(MotionEvent e)
+    {
+        return true;
+    }
+
+    @Override
+    public boolean onDoubleTapEvent(MotionEvent e)
+    {
+        return true;
+    }
+
+    @Override
+    public boolean onSingleTapConfirmed(MotionEvent e)
+    {
+        return true;
+    }
+
+//    6 methods from gesture on GestureListener
+    @Override
+    public boolean onDown(MotionEvent e)
+    {
+        return true;
+    }
+
+    @Override
+    public boolean onFling(MotionEvent el, MotionEvent e2, float velocityX, float velocityY)
+    {
+        return true;
+    }
+
+    @Override
+    public void onLongPress(MotionEvent e)
+    {
+    }
+
+    @Override
+    public boolean onScroll(MotionEvent el, MotionEvent e2, float distanceX, float distanceY)
+    {
+        uninitialize();
+        System.exit(0);
+        return true;
+    }
+
+    @Override
+    public void onShowPress(MotionEvent e)
+    {
+        // Code
+    }
+
+    @Override
+    public boolean onSingleTapUp(MotionEvent e)
+    {
+        return true;
+    }
+
+    // Our custom OpenGLES method
+    private int initialize(GL10 gl)
+    {
+        printGLESInfo(gl);
+
+        // VERTEX SHADER
+        // 1. Write shader source code
+	    final String vertexShaderSourceCode = String.format
+                (
+                    "#version 310 es\n" +
+                    "in vec4 aPosition;\n" +
+                    "in vec4 aColor;\n" +
+                    "uniform mat4 uMVPMatrix;\n" +
+                    "out vec4 out_color;\n" +
+                    "void main(void)\n" +
+                    "{\n" +
+                        "gl_Position = uMVPMatrix * aPosition;\n" +
+                        "out_color = aColor;\n" +
+                    "}\n"
+                );
+
+        // 2. Create the shader object
+        int vertexShaderObject = GLES32.glCreateShader(GLES32.GL_VERTEX_SHADER);
+
+        // 3. Give the shader source code to the shader object
+        GLES32.glShaderSource(vertexShaderObject, vertexShaderSourceCode);
+
+        // 4. Compile the shader programmatically
+        GLES32.glCompileShader(vertexShaderObject);
+
+        // 5. Do shader compilation error checking
+        int status[] = new int[1];
+        int infoLogLength[] = new int[1];
+        String szInfoLog = null;
+
+        GLES32.glGetShaderiv(vertexShaderObject, GLES32.GL_COMPILE_STATUS, status,0);
+        if (status[0] == GLES32.GL_FALSE)
+        {
+            GLES32.glGetShaderiv(vertexShaderObject, GLES32.GL_INFO_LOG_LENGTH, infoLogLength, 0);
+            if (infoLogLength[0] > 0)
+            {
+                szInfoLog = GLES32.glGetShaderInfoLog(vertexShaderObject);
+                if (szInfoLog != null)
+                {
+                    GLES32.glGetShaderInfoLog(vertexShaderObject);
+                    System.out.println("AMC: VERTEX SHADER COMPILATION LOG = " + szInfoLog);
+                }
+            }
+            uninitialize();
+            System.exit(0);
+        }
+
+        // FRAGMENT SHADER
+        // 1. Write shader source code
+        final String fragmentShaderSourceCode = String.format
+                (
+                    "#version 310 es\n" +
+                    "precision highp float;\n" +
+                    "in vec4 out_color;\n" +
+                    "out vec4 fragColor;\n" +
+                    "void main(void)\n" +
+                    "{\n" +
+                        "fragColor = out_color;\n" +
+                    "}\n"
+                );
+
+        // 2. Create the shader object
+        int fragmentShaderObject = GLES32.glCreateShader(GLES32.GL_FRAGMENT_SHADER);
+
+        // 3. Give the shader source code to the shader object
+        GLES32.glShaderSource(fragmentShaderObject, fragmentShaderSourceCode);
+
+        // 4. Compile the shader programmatically
+        GLES32.glCompileShader(fragmentShaderObject);
+
+        // 5. Do shader compilation error checking
+        status[0] = 0;
+        infoLogLength[0] = 0;
+        szInfoLog = null;
+
+        GLES32.glGetShaderiv(fragmentShaderObject, GLES32.GL_COMPILE_STATUS, status,0);
+        if (status[0] == GLES32.GL_FALSE)
+        {
+            GLES32.glGetShaderiv(fragmentShaderObject, GLES32.GL_INFO_LOG_LENGTH, infoLogLength, 0);
+            if (infoLogLength[0] > 0)
+            {
+                szInfoLog = GLES32.glGetShaderInfoLog(fragmentShaderObject);
+                if (szInfoLog != null)
+                {
+                    GLES32.glGetShaderInfoLog(fragmentShaderObject);
+                    System.out.println("AMC: FRAGMENT SHADER COMPILATION LOG = " + szInfoLog);
+                }
+            }
+            uninitialize();
+            System.exit(0);
+        }
+
+        // Create, attach, link shader program object
+        shaderProgramObject = GLES32.glCreateProgram();
+        GLES32.glAttachShader(shaderProgramObject, vertexShaderObject);
+        GLES32.glAttachShader(shaderProgramObject, fragmentShaderObject);
+
+        // Bind shader attribute at a certain index in shader to save index in host program
+        GLES32.glBindAttribLocation(shaderProgramObject, MyAttributes.AMC_ATTRIBUTE_POSITION, "aPosition");
+        GLES32.glBindAttribLocation(shaderProgramObject, MyAttributes.AMC_ATTRIBUTE_COLOR, "aColor");
+        GLES32.glLinkProgram(shaderProgramObject);
+
+        // Link error checking
+        status[0] = 0;
+        infoLogLength[0] = 0;
+        szInfoLog = null;
+
+        GLES32.glGetProgramiv(shaderProgramObject, GLES32.GL_LINK_STATUS, status, 0);
+        if (status[0] == GLES32.GL_FALSE)
+        {
+            GLES32.glGetProgramiv(shaderProgramObject, GLES32.GL_INFO_LOG_LENGTH, infoLogLength, 0);
+            if (infoLogLength[0] > 0)
+            {
+                szInfoLog = GLES32.glGetProgramInfoLog(shaderProgramObject);
+                if (szInfoLog != null)
+                {
+                    GLES32.glGetProgramInfoLog(shaderProgramObject);
+                    System.out.println("AMC: SHADER PROGRAM LINK LOG = " + szInfoLog);
+                }
+            }
+            uninitialize();
+            System.exit(0);
+        }
+
+        // Get the required uniform location from the shader
+        mvpMatrixUniform = GLES32.glGetUniformLocation(shaderProgramObject, "uMVPMatrix");
+
+        // Provide vertex position, color, normal, texCoord etc.
+        final float triangle_position[] = new float[]
+                {
+                    0.0f, 1.0f, 0.0f,
+                    -1.0f, -1.0f, 0.0f,
+                    1.0f, -1.0f, 0.0f,
+                };
+
+        final float triangle_color[] = new float[]
+                {
+                    1.0f, 0.0f, 0.0f,
+                    0.0f, 1.0f, 0.0f,
+                    0.0f, 0.0f, 1.0f,
+                };
+
+        final float rectangle_position[] = new float[]
+                {
+                    1.0f, 1.0f, 0.0f,  // top right
+                    -1.0f, 1.0f, 0.0f, // top left
+                    -1.0f, -1.0f, 0.0f, // left bottom
+                    1.0f, -1.0f, 0.0f, // right bottom
+                };
+
+        final float rectangle_color[] = new float[]
+                {
+                    1.0f, 0.0f, 0.0f,
+                    0.0f, 1.0f, 0.0f,
+                    0.0f, 0.0f, 1.0f,
+                    1.0f, 1.0f, 0.0f
+                };
+
+        // VERTEX ARRAY OBJECT FOR ARRAYS OF VERTEX OBJECT
+        GLES32.glGenVertexArrays(1, vao_triangle, 0);
+        // Bind vertex array object
+        GLES32.glBindVertexArray(vao_triangle[0]);
+        // POSITION
+        GLES32.glGenBuffers(1, vbo_position_triangle, 0);
+        GLES32.glBindBuffer(GLES32.GL_ARRAY_BUFFER, vbo_position_triangle[0]);
+        // Create a native buffer suitable for native IO but for Java
+        ByteBuffer byteBuffer = ByteBuffer.allocateDirect(triangle_position.length * 4);
+        byteBuffer.order(ByteOrder.nativeOrder());
+        FloatBuffer trianglePositionBuffer = byteBuffer.asFloatBuffer();
+        trianglePositionBuffer.put(triangle_position);
+        trianglePositionBuffer.position(0);
+        GLES32.glBufferData(GLES32.GL_ARRAY_BUFFER, triangle_position.length * 4, trianglePositionBuffer, GLES32.GL_STATIC_DRAW);
+        GLES32.glVertexAttribPointer(MyAttributes.AMC_ATTRIBUTE_POSITION, 3, GLES32.GL_FLOAT, false, 0, 0);
+        GLES32.glEnableVertexAttribArray(MyAttributes.AMC_ATTRIBUTE_POSITION);
+        GLES32.glBindBuffer(GLES32.GL_ARRAY_BUFFER, 0);
+
+        // COLOR
+        GLES32.glGenBuffers(1, vbo_color_triangle, 0);
+        GLES32.glBindBuffer(GLES32.GL_ARRAY_BUFFER, vbo_color_triangle[0]);
+        // Create a native buffer suitable for native IO but for Java
+        byteBuffer = ByteBuffer.allocateDirect(triangle_position.length * 4);
+        byteBuffer.order(ByteOrder.nativeOrder());
+        FloatBuffer triangleColorBuffer = byteBuffer.asFloatBuffer();
+        triangleColorBuffer.put(triangle_color);
+        triangleColorBuffer.position(0);
+        GLES32.glBufferData(GLES32.GL_ARRAY_BUFFER, triangle_color.length * 4, triangleColorBuffer, GLES32.GL_STATIC_DRAW);
+        GLES32.glVertexAttribPointer(MyAttributes.AMC_ATTRIBUTE_COLOR, 3, GLES32.GL_FLOAT, false, 0, 0);
+        GLES32.glEnableVertexAttribArray(MyAttributes.AMC_ATTRIBUTE_COLOR);
+        GLES32.glBindBuffer(GLES32.GL_ARRAY_BUFFER, 0);
+
+        // unbind VAO
+        GLES32.glBindVertexArray(0);
+
+        // RECTANGLE
+        // VERTEX ARRAY OBJECT FOR ARRAYS OF VERTEX OBJECT
+        GLES32.glGenVertexArrays(1, vao_rectangle, 0);
+        // Bind vertex array object
+        GLES32.glBindVertexArray(vao_rectangle[0]);
+        // POSITION
+        GLES32.glGenBuffers(1, vbo_position_rectangle, 0);
+        GLES32.glBindBuffer(GLES32.GL_ARRAY_BUFFER, vbo_position_rectangle[0]);
+        // Create a native buffer suitable for native IO but for Java
+        byteBuffer = ByteBuffer.allocateDirect(rectangle_position.length * 4);
+        byteBuffer.order(ByteOrder.nativeOrder());
+        FloatBuffer rectanglePositionBuffer = byteBuffer.asFloatBuffer();
+        rectanglePositionBuffer.put(rectangle_position);
+        rectanglePositionBuffer.position(0);
+        GLES32.glBufferData(GLES32.GL_ARRAY_BUFFER, rectangle_position.length * 4, rectanglePositionBuffer, GLES32.GL_STATIC_DRAW);
+        GLES32.glVertexAttribPointer(MyAttributes.AMC_ATTRIBUTE_POSITION, 3, GLES32.GL_FLOAT, false, 0, 0);
+        GLES32.glEnableVertexAttribArray(MyAttributes.AMC_ATTRIBUTE_POSITION);
+        GLES32.glBindBuffer(GLES32.GL_ARRAY_BUFFER, 0);
+
+        // COLOR
+        GLES32.glGenBuffers(1, vbo_color_rectangle, 0);
+        GLES32.glBindBuffer(GLES32.GL_ARRAY_BUFFER, vbo_color_rectangle[0]);
+        // Create a native buffer suitable for native IO but for Java
+        byteBuffer = ByteBuffer.allocateDirect(rectangle_position.length * 4);
+        byteBuffer.order(ByteOrder.nativeOrder());
+        FloatBuffer rectangleColorBuffer = byteBuffer.asFloatBuffer();
+        rectangleColorBuffer.put(rectangle_color);
+        rectangleColorBuffer.position(0);
+        GLES32.glBufferData(GLES32.GL_ARRAY_BUFFER, rectangle_color.length * 4, rectangleColorBuffer, GLES32.GL_STATIC_DRAW);
+        GLES32.glVertexAttribPointer(MyAttributes.AMC_ATTRIBUTE_COLOR, 3, GLES32.GL_FLOAT, false, 0, 0);
+        GLES32.glEnableVertexAttribArray(MyAttributes.AMC_ATTRIBUTE_COLOR);
+        GLES32.glBindBuffer(GLES32.GL_ARRAY_BUFFER, 0);
+
+        // unbind VAO
+        GLES32.glBindVertexArray(0);
+
+        // Depth initialization
+        GLES32.glClearDepthf(1.0f);
+        GLES32.glEnable(GLES32.GL_DEPTH_TEST);
+        GLES32.glDepthFunc(GLES32.GL_LEQUAL);
+
+        // Set the clear color
+        GLES32.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+        Matrix.setIdentityM(perspectiveProjectionMatrix, 0);
+
+        return 0;
+    }
+
+    private void printGLESInfo(GL10 gl)
+    {
+        // code
+        String gles_vendor = gl.glGetString(GL10.GL_VENDOR);
+        String gles_renderer = gl.glGetString(GL10.GL_RENDERER);
+        String gles_version = gl.glGetString(GL10.GL_VERSION);
+
+        System.out.println("AMC: GLES Vendor - " + gles_vendor);
+        System.out.println("AMC: GLES renderer - " + gles_renderer);
+        System.out.println("AMC: GLES Version - " + gles_version);
+
+    }
+
+    private void resize(int width, int height)
+    {
+        // Code
+        if (height <= 0)
+        {
+            height = 1;
+        }
+
+        // Set the viewport
+        GLES32.glViewport(0, 0, width, height);
+
+        // do perspective projection
+        Matrix.perspectiveM(perspectiveProjectionMatrix, 0, 45.0f, (float)width/(float)height, 0.1f, 100.0f);
+    }
+
+    private void display()
+    {
+        // Code
+        GLES32.glClear(GLES32.GL_COLOR_BUFFER_BIT | GLES32.GL_DEPTH_BUFFER_BIT);
+
+        // use shader program object
+        GLES32.glUseProgram(shaderProgramObject);
+
+        // Transformations
+        float modelViewMatrix[] = new float[16]; // this is similar to glLoadIdentity() in display for model view matrix
+        Matrix.setIdentityM(modelViewMatrix, 0);
+        float translationMatrix[] = new float[16];
+        Matrix.setIdentityM(translationMatrix, 0);
+        Matrix.translateM(translationMatrix, 0, -1.5f, 0.0f, -10.0f);
+        float rotationMatrix[] = new float[16];
+        Matrix.setIdentityM(rotationMatrix, 0);
+        Matrix.rotateM(rotationMatrix, 0, angleTriangle, 0.0f, 1.0f, 0.0f);
+        Matrix.multiplyMM(modelViewMatrix, 0, translationMatrix, 0, rotationMatrix, 0);
+        float modelViewProjectionMatrix[] = new float[16];
+        Matrix.setIdentityM(modelViewProjectionMatrix, 0);
+        Matrix.multiplyMM(modelViewProjectionMatrix, 0, perspectiveProjectionMatrix, 0, modelViewMatrix, 0);
+
+        // send above matrix to the shader in "uniform"
+        GLES32.glUniformMatrix4fv(mvpMatrixUniform, 1, false, modelViewProjectionMatrix, 0);
+
+        // Bind with VAO
+        GLES32.glBindVertexArray(vao_triangle[0]);
+
+        // Draw the vertex arrays
+        GLES32.glDrawArrays(GLES32.GL_TRIANGLES, 0, 3);
+
+        // Unbind with VAO
+        GLES32.glBindVertexArray(0);
+
+        // RECTANGLE
+        // Transformations
+        Matrix.setIdentityM(modelViewMatrix, 0);
+        Matrix.setIdentityM(translationMatrix, 0);
+        Matrix.translateM(translationMatrix, 0, 1.5f, 0.0f, -10.0f);
+        Matrix.setIdentityM(rotationMatrix, 0);
+        Matrix.rotateM(rotationMatrix, 0, angleRectangle, 0.0f, 1.0f, 0.0f);
+        Matrix.multiplyMM(modelViewMatrix, 0, translationMatrix, 0, rotationMatrix, 0);
+        Matrix.setIdentityM(modelViewProjectionMatrix, 0);
+        Matrix.multiplyMM(modelViewProjectionMatrix, 0, perspectiveProjectionMatrix, 0, modelViewMatrix, 0);
+
+        // send above matrix to the shader in "uniform"
+        GLES32.glUniformMatrix4fv(mvpMatrixUniform, 1, false, modelViewProjectionMatrix, 0);
+
+        // Bind with VAO
+        GLES32.glBindVertexArray(vao_rectangle[0]);
+
+        // Draw the vertex arrays
+        GLES32.glDrawArrays(GLES32.GL_TRIANGLE_FAN, 0, 4);
+
+        // Unbind with VAO
+        GLES32.glBindVertexArray(0);
+
+        // unuse shader program object
+        GLES32.glUseProgram(0);
+
+        // Similar to swap buffer
+        requestRender();
+    }
+
+    private void update()
+    {
+        // code
+        angleTriangle = angleTriangle + 0.2f;
+        if(angleTriangle >= 360.0f)
+        {
+            angleTriangle = angleTriangle - 360.0f;
+        }
+
+        angleRectangle = angleRectangle + 0.2f;
+        if(angleRectangle >= 360.0f)
+        {
+            angleRectangle = angleRectangle - 360.0f;
+        }
+    }
+
+    private void uninitialize()
+    {
+        // Code
+        if (vbo_position_rectangle[0] > 0)
+        {
+            GLES32.glDeleteBuffers(1, vbo_position_rectangle,0);
+            vbo_position_rectangle[0] = 0;
+        }
+
+        // Free VAO
+        if (vao_rectangle[0] > 0)
+        {
+            GLES32.glDeleteVertexArrays(1, vao_rectangle, 0);
+            vao_rectangle[0] = 0;
+        }
+
+        // Free vbo_position
+        if (vbo_position_triangle[0] > 0)
+        {
+            GLES32.glDeleteBuffers(1, vbo_position_triangle,0);
+            vbo_position_triangle[0] = 0;
+        }
+        // Free VAO
+        if (vao_triangle[0] > 0)
+        {
+            GLES32.glDeleteVertexArrays(1, vao_triangle, 0);
+            vao_triangle[0] = 0;
+        }
+
+        // Detach, delete shader objects and delete shader program object
+        if (shaderProgramObject > 0)
+        {
+            GLES32.glUseProgram(shaderProgramObject);
+            int retVal[] = new int[1];
+            GLES32.glGetProgramiv(shaderProgramObject, GLES32.GL_ATTACHED_SHADERS, retVal, 0);
+            int numAttachedShaders = retVal[0];
+            if (numAttachedShaders > 0)
+            {
+                int shaderObjects[] = new int[numAttachedShaders];
+                GLES32.glGetAttachedShaders(shaderProgramObject, numAttachedShaders, retVal, 0, shaderObjects, 0);
+                for (int i = 0; i < numAttachedShaders; i++)
+                {
+                    GLES32.glDetachShader(shaderProgramObject, shaderObjects[i]);
+                    GLES32.glDeleteShader(shaderObjects[i]);
+                    shaderObjects[i] = 0;
+                }
+            }
+            GLES32.glUseProgram(0);
+            GLES32.glDeleteProgram(shaderProgramObject);
+            shaderProgramObject = 0;
+        }
+    }
+}
+

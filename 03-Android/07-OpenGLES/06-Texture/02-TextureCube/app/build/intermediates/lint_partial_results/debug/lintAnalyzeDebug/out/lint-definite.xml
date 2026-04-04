@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<incidents format="6" by="lint 8.13.0" type="incidents">
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of androidx.appcompat:appcompat than 1.6.1 is available: 1.7.1">
+        <fix-replace
+            description="Change to 1.7.1"
+            family="Update versions"
+            oldString="1.6.1"
+            replacement="1.7.1"
+            priority="0"/>
+        <location
+            file="$HOME/AndroidStudioProjects/02-Temptelet/gradle/libs.versions.toml"
+            line="6"
+            column="13"
+            startOffset="101"
+            endLine="6"
+            endColumn="20"
+            endOffset="108"/>
+    </incident>
+
+    <incident
+        id="GradleDependency"
+        severity="warning"
+        message="A newer version of com.google.android.material:material than 1.10.0 is available: 1.13.0">
+        <fix-replace
+            description="Change to 1.13.0"
+            family="Update versions"
+            oldString="1.10.0"
+            replacement="1.13.0"
+            priority="0"/>
+        <location
+            file="$HOME/AndroidStudioProjects/02-Temptelet/gradle/libs.versions.toml"
+            line="7"
+            column="12"
+            startOffset="120"
+            endLine="7"
+            endColumn="20"
+            endOffset="128"/>
+    </incident>
+
+    <incident
+        id="SetTextI18n"
+        severity="warning"
+        message="String literal in `setText` can not be translated. Use Android resources instead.">
+        <location
+            file="${:app*debug*MAIN*sourceProvider*0*javaDir*0}/com/example/window/MainActivity.java"
+            line="19"
+            column="28"
+            startOffset="690"
+            endLine="19"
+            endColumn="43"
+            endOffset="705"/>
+    </incident>
+
+</incidents>
