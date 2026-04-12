@@ -65,7 +65,7 @@ mat4 perspectiveProjectionMatrix;
 // taxture related global variables
 GLuint texture_smiley;
 GLuint textureSamplerUniform;
-GLuint64 keyPressUniform = 0;
+GLuint keyPressUniform = 0;
 
 static int KeyPressed = 0;
 
