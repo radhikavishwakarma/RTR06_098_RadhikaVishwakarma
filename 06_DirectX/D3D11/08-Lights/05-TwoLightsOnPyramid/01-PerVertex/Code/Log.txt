@@ -1,0 +1,14 @@
+Program Started Successfully...
+.
+Feature level 11.0 is aquired
+ D3D Compiled for Vertex shader Succeeded... !!!
+CreateVertexShader succeded... !!!
+ D3D Compiled for Pixel shader Succeeded... !!!
+CreatePixelShader succeded... !!!
+CreateInputLayout succeded... !!!
+CreateBuffer succeded for position buffer !!!
+CreateBuffer succeded for color buffer !!!
+CreateBuffer succeded !!!
+CreateRasterizerState succeded !!!
+resize succeded !!!
+Initialize Function Completed Successfully ...
